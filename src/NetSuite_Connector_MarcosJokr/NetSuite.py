@@ -25,9 +25,6 @@ class NetSuite(object):
 
         self.oauth_version = "1.0"
         self.signature_method = "HMAC-SHA256"
-        # parameters = HttpHook(http_conn_id="netsuite-credentials-prd")
-        # conn = parameters.get_connection("netsuite-credentials-prd")
-        # self.conf = conn.extra_dejson
         self.account_id = account_id
         self.consumer_key = (
             consumer_keys["consumer_key"]
