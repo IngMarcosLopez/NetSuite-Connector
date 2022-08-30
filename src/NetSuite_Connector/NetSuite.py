@@ -11,12 +11,17 @@ logger.setLevel(logging.INFO)
 
 class NetSuite(object):
     """
-    nt = Netsuite()
+    from NetSuite_Connector.NetSuite import NetSuite
+    nt = NetSuite(
+        account_id=123456,
+        consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
+        token_keys=dict(token_id="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
+    )
 
     x = nt.get(
         url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
-        body=[],
         headers={"Content-Type": "application/json"},
+        params={}
     )
     print(x.__dict__)
     """
@@ -93,7 +98,7 @@ class NetSuite(object):
         except:
             logger.warning(traceback.format_exc())
             response = {"code": 500, "response": traceback.format_exc()}
-        return obj(response)
+        return NetsuiteObject(response)
 
     def get(self, **kwargs) -> requests.Response:
         return self._make_request(http_method="GET", **kwargs)
@@ -105,10 +110,14 @@ class NetSuite(object):
         return self._make_request(http_method="POST", **kwargs)
 
 
-class obj(object):
+class NetsuiteObject(object):
     def __init__(self, d):
         for a, b in d.items():
             if isinstance(b, (list, tuple)):
-                setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
+                setattr(
+                    self,
+                    a,
+                    [NetsuiteObject(x) if isinstance(x, dict) else x for x in b],
+                )
             else:
-                setattr(self, a, obj(b) if isinstance(b, dict) else b)
+                setattr(self, a, NetsuiteObject(b) if isinstance(b, dict) else b)
