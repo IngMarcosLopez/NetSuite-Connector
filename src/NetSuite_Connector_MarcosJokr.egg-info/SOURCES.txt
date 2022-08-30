@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+src/NetSuite_Connector_MarcosJokr/NetSuite.py
+src/NetSuite_Connector_MarcosJokr/__init__.py
+src/NetSuite_Connector_MarcosJokr.egg-info/PKG-INFO
+src/NetSuite_Connector_MarcosJokr.egg-info/SOURCES.txt
+src/NetSuite_Connector_MarcosJokr.egg-info/dependency_links.txt
+src/NetSuite_Connector_MarcosJokr.egg-info/top_level.txt
