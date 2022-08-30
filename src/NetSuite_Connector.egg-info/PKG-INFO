@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
-Name: NetSuite-Connector-MarcosJokr
-Version: 0.0.1
+Name: NetSuite-Connector
+Version: 0.0.2
 Summary: NetSuite Connector
 Author-email: Marcos Lopez <erick.lopez@jokr.it>
 License: MIT License
@@ -35,3 +35,12 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 
 # NetSuite-Connector
+
+nt = Netsuite()
+
+x = nt.get(
+    url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
+    body=[],
+    headers={"Content-Type": "application/json"},
+)
+print(x.__dict__)
