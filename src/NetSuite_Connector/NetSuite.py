@@ -5,8 +5,8 @@ import traceback
 import requests
 import requests_oauthlib as oauth
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 class NetSuite(object):
@@ -72,7 +72,7 @@ class NetSuite(object):
     ) -> requests.Response:
         try:
             self._request_session = self._make_request_session()
-            logger.debug(
+            log.debug(
                 f"Making request to restlet at {url}. Payload {body}. "
                 f"Headers: {json.dumps(headers)}"
             )
@@ -87,7 +87,7 @@ class NetSuite(object):
                 params=params,
                 headers=headers,
             )
-            logger.debug(f"Got response headers: {json.dumps(dict(resp.headers))}")
+            log.debug(f"Got response headers: {json.dumps(dict(resp.headers))}")
             response = {
                 "url": url,
                 "request_headers": headers,
@@ -96,7 +96,7 @@ class NetSuite(object):
                 "code": resp.status_code,
             }
         except:
-            logger.warning(traceback.format_exc())
+            log.warning(traceback.format_exc())
             response = {"code": 500, "response": traceback.format_exc()}
         return NetsuiteObject(response)
 
