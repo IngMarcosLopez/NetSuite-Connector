@@ -1,6 +1,7 @@
 import json
 import logging
 import traceback
+from typing import Any
 
 import requests
 import requests_oauthlib as oauth
@@ -26,8 +27,7 @@ class NetSuite(object):
     print(x.__dict__)
     """
 
-    def __init__(self, account_id: int, consumer_keys: dict, token_keys: dict) -> None:
-
+    def __init__(self, account_id: Any, consumer_keys: dict, token_keys: dict) -> None:
         self.oauth_version = "1.0"
         self.signature_method = "HMAC-SHA256"
         self.account_id = account_id
