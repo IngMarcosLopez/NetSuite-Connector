@@ -1,18 +1,15 @@
 import base64
-import binascii
 import hashlib
 import hmac
 import random
-
-try:
-    from secrets import randbits
-except ImportError:
-    from random import getrandbits as randbits
-
 import time
+import traceback
 from typing import Any
 
+import pandas as pd
 import pyodbc
+
+from .NetSuite import NetsuiteObject
 
 
 class ODBC(object):
@@ -24,8 +21,9 @@ class ODBC(object):
         user_email: str,
         role_id: int,
         dsn: str,
-        consumer_keys: dict,
-        token_keys: dict,
+        password: str = None,
+        consumer_keys: dict = {},
+        token_keys: dict = {},
     ) -> None:
         self.oauth_version = "1.0"
         self.signature_method = "HMAC-SHA256"
@@ -33,6 +31,7 @@ class ODBC(object):
         self.user = user_email
         self.role_id = role_id
         self.dsn = dsn
+        self.password = password
         self.consumer_key = (
             consumer_keys["consumer_key"]
             if consumer_keys and "consumer_key" in consumer_keys
@@ -62,7 +61,7 @@ class ODBC(object):
         )
         return "".join(
             [
-                word_characters[random.randint(0, len(word_characters))]
+                word_characters[random.randint(0, len(word_characters) - 1)]
                 for i in range(length)
             ]
         )
@@ -91,17 +90,35 @@ class ODBC(object):
         token_password = f"{base_string}&{signature}"
         return token_password
 
-    def query(self):
-        conn = pyodbc.connect(
-            f"DSN={self.dsn};UID={self.user};password={self._make_password()}"
-        )
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT TABLE_NAME,COLUMN_NAME FROM OA_Columns ORDER BY TABLE_NAME ASC"
-        )
-        head = cur.description
-        data = cur.fetchall()
-        cur.close()
-        conn.close()
+    def query(self, query: str) -> dict:
+        """
+        Perfom a query to ODBC driver
+        query: fully qualified sql query
+        """
+        try:
 
-        return head
+            conn_str = f"DSN={self.dsn};LogonID={self.user};PWD={self.password};RoleID:{self.role_id}"
+            conn = pyodbc.connect(conn_str)
+            cur = conn.cursor()
+            cur.execute(query)
+            head = cur.description
+            data = cur.fetchall()
+            cur.close()
+            conn.close()
+
+            df = pd.DataFrame(
+                data=[tuple(x) for x in data], columns=[i[0] for i in head]
+            )
+            response = {
+                "status": 200,
+                "data_received": query,
+                "columns": [i[0] for i in head],
+                "response": df.to_json(orient="records"),
+            }
+        except Exception:
+            response = {
+                "status": 500,
+                "data_received": query,
+                "response": traceback.format_exc(),
+            }
+        return NetsuiteObject(response)
