@@ -90,10 +90,18 @@ class ODBC(object):
         token_password = f"{base_string}&{signature}"
         return token_password
 
-    def query(self, query: str) -> dict:
+    def query(self, query: str) -> NetsuiteObject:
         """
         Perfom a query to ODBC driver
         query: fully qualified sql query
+        >>> from NetSuite_Connector.ODBC import ODBC
+
+        >>> nt = ODBC(account_id="*****", user_email="*****", role_id="*****", dsn="*****", password="*****")
+
+        >>> q = nt.query("SELECT * FROM OA_tables")
+        <NetSuite.NetsuiteObject>
+
+        >>> print(q.__dict__)
         """
         try:
 

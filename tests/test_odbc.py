@@ -11,6 +11,6 @@ def test_make_query_success():
     from NetSuite_Connector.ODBC import ODBC
 
     nt = ODBC(**env_params)
-    d = nt.query("SELECT * FROM OA_tables")
-    print(d.__dict__)
-    assert d.status == 200
+    q = nt.query("SELECT * FROM OA_tables")
+    print(q.__dict__)
+    assert q.status == 200
