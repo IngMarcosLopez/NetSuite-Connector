@@ -112,3 +112,4 @@ src/logs/*
 .gitignore
 docker/*.json
 *.code-workspace
+.vscode/settings.json
