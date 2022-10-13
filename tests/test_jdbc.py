@@ -8,7 +8,7 @@ env_params = dict(
 
 
 def test_make_query_success():
-    from src.NetSuite_Connector.ODBC import ODBC
+    from NetSuite_Connector.ODBC import ODBC
 
     nt = ODBC(**env_params)
     d = nt.query("SELECT * FROM OA_tables")
