@@ -2,6 +2,7 @@ import base64
 import binascii
 import hashlib
 import hmac
+import random
 
 try:
     from secrets import randbits
@@ -56,7 +57,15 @@ class ODBC(object):
     @staticmethod
     def generate_nonce(length=20):
         """Generate pseudo-random number."""
-        return str(str(randbits(64)) + ODBC.generate_timestamp())
+        word_characters = (
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        )
+        return "".join(
+            [
+                word_characters[random.randint(0, len(word_characters))]
+                for i in range(length)
+            ]
+        )
 
     @staticmethod
     def generate_timestamp():
