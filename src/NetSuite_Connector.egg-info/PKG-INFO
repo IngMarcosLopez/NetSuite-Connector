@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: NetSuite-Connector
-Version: 0.1.0
+Version: 0.1.1
 Summary: NetSuite Connector
-Author-email: Marcos Lopez <erick.lopez@jokr.it>
+Author-email: Marcos Lopez <merick16@gmail.com>
 License: MIT License
         
         Copyright (c) 2022 Jokr
@@ -25,8 +25,8 @@ License: MIT License
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
         
-Project-URL: Homepage, https://github.com/Marcosjokr/NetSuite-Connector
-Project-URL: Bug Tracker, https://github.com/Marcosjokr/NetSuite-Connector/issues
+Project-URL: Homepage, https://github.com/IngMarcosLopez/NetSuite-Connector
+Project-URL: Bug Tracker, https://github.com/IngMarcosLopez/NetSuite-Connector/issues
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
