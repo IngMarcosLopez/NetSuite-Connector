@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "NetSuite-Connector"
 version = "0.1.0"
 authors = [
-  { name="Marcos Lopez", email="erick.lopez@jokr.it" },
+  { name="Marcos Lopez", email="merick16@gmail.com" },
 ]
 description = "NetSuite Connector"
 readme = "README.md"
@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/Marcosjokr/NetSuite-Connector"
-"Bug Tracker" = "https://github.com/Marcosjokr/NetSuite-Connector/issues"
+"Homepage" = "https://github.com/IngMarcosLopez/NetSuite-Connector"
+"Bug Tracker" = "https://github.com/IngMarcosLopez/NetSuite-Connector/issues"
