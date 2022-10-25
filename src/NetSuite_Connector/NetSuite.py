@@ -109,6 +109,9 @@ class NetSuite(object):
     def post(self, **kwargs) -> requests.Response:
         return self._make_request(http_method="POST", **kwargs)
 
+    def delete(self, **kwargs) -> requests.Response:
+        return self._make_request(http_method="DELETE", **kwargs)
+
 
 class NetsuiteObject(object):
     def __init__(self, d):
