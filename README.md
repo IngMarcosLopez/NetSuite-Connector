@@ -22,10 +22,10 @@ x = nt.get(
     headers={"Content-Type": "application/json"},
     params={}
 )
-print(x.__dict__)
-# Response <200>
+print(x)
+# NetsuiteObject(url='https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx', request_headers={'Content-Type': 'application/json'}, response='{"foo":"bar"}', code=200)
 ```
-### RESTlet PUT - POST
+### RESTlet PUT - POST - DELETE
 ```python
 from NetSuite_Connector.NetSuite import NetSuite
 nt = NetSuite(
@@ -40,8 +40,8 @@ x = nt.post(
     params={},
     body=body
 )
-print(x.__dict__)
-# Response <200>
+print(x)
+# NetsuiteObject(url='https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx', request_headers={'Content-Type': 'application/json'}, request_data={"foo":"bar"}, response='{"foo":"bar"}', code=200)
 ```
 # ODBC Queries
 
@@ -65,7 +65,6 @@ nt = ODBC(
     password="*****"
 )
 q = nt.query("SELECT * FROM OA_tables")
-# <NetSuite_Connector.NetsuiteObject>
 print(q.status)
 # 200
 print(q.response)
