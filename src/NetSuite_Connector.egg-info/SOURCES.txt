@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+src/NetSuite_Connector/NetSuite.py
+src/NetSuite_Connector/ODBC.py
+src/NetSuite_Connector/__init__.py
+src/NetSuite_Connector.egg-info/PKG-INFO
+src/NetSuite_Connector.egg-info/SOURCES.txt
+src/NetSuite_Connector.egg-info/dependency_links.txt
+src/NetSuite_Connector.egg-info/top_level.txt
+tests/test_odbc.py
