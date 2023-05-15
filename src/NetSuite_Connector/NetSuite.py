@@ -18,6 +18,9 @@ class NetsuiteObject:
     response: str = None
     code: int = None
 
+    def __repr__(self):
+        return f"NetsuiteObject(url={self.url}, request_headers={self.request_headers}, request_data={self.request_data}, response={self.response}, code={self.code})"
+
     @property
     def json(self):
         return asdict(self)
@@ -25,6 +28,8 @@ class NetsuiteObject:
 
 class NetSuite(object):
     """
+    The NetSuite class is a Python wrapper for the NetSuite REST API. It provides methods for making HTTP requests to the NetSuite REST API using OAuth 1.0 authentication. The class supports GET, PUT, POST, and DELETE HTTP methods. The class also provides error handling for failed requests.
+    ```
     from NetSuite_Connector.NetSuite import NetSuite
     nt = NetSuite(
         account_id=123456,
@@ -37,36 +42,33 @@ class NetSuite(object):
         headers={"Content-Type": "application/json"},
         params={}
     )
-    print(x.__dict__)
+    print(x)
+    # NetsuiteObject(url='https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx', request_headers={'Content-Type': 'application/json'}, response='{"foo":"bar"}', code=200)
+    ```
     """
 
     def __init__(self, account_id: Any, consumer_keys: dict, token_keys: dict) -> None:
         self.oauth_version = "1.0"
         self.signature_method = "HMAC-SHA256"
         self.account_id = account_id
-        self.consumer_key = (
-            consumer_keys["consumer_key"]
-            if consumer_keys and "consumer_key" in consumer_keys
-            else None
-        )
-        self.consumer_secret = (
-            consumer_keys["consumer_secret"]
-            if consumer_keys and "consumer_secret" in consumer_keys
-            else None
-        )
-        self.token_id = (
-            token_keys["token_key"]
-            if token_keys and "token_key" in token_keys
-            else None
-        )
-        self.token_secret = (
-            token_keys["token_secret"]
-            if token_keys and "token_secret" in token_keys
-            else None
-        )
+        self.consumer_key, self.consumer_secret = self._validate_keys(
+            consumer_keys, ["consumer_key", "consumer_secret"]
+        ).values()
+        self.token_id, self.token_secret = self._validate_keys(
+            token_keys, ["token_id", "token_secret"]
+        ).values()
         self._request_session = None
 
+    def _validate_keys(self, keys: dict, key_names: list) -> dict:
+        missing_keys = [k for k in key_names if k not in keys]
+        if missing_keys:
+            raise ValueError(f"Missing required keys: {missing_keys}")
+        return {k: keys[k] for k in key_names}
+
     def _make_request_session(self) -> oauth.OAuth1Session:
+        """
+        Creates an OAuth1Session object for making requests to the NetSuite REST API.
+        """
         return oauth.OAuth1Session(
             signature_method=self.signature_method,
             client_key=self.consumer_key,
@@ -80,10 +82,13 @@ class NetSuite(object):
         self,
         http_method: str,
         url: str,
-        headers: dict = {},
-        params: dict = {},
-        body: dict = {},
+        headers: dict[str, str] = {},
+        params: dict[str, Any] = {},
+        body: dict[str, Any] = {},
     ) -> NetsuiteObject:
+        """
+        Makes an HTTP request to the NetSuite REST API using the specified HTTP method, URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        """
         log.debug("Making request to restlet at %s.", url)
         log.debug("Payload: %s", body)
         log.debug("Headers: %s", json.dumps(headers))
@@ -108,13 +113,25 @@ class NetSuite(object):
         return response
 
     def get(self, **kwargs) -> NetsuiteObject:
+        """
+        Makes a GET request to the NetSuite REST API using the specified URL, headers, and parameters. Returns a NetsuiteObject containing the response data.
+        """
         return self._make_request(http_method="GET", **kwargs)
 
     def put(self, **kwargs) -> NetsuiteObject:
+        """
+        Makes a PUT request to the NetSuite REST API using the specified URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        """
         return self._make_request(http_method="PUT", **kwargs)
 
     def post(self, **kwargs) -> NetsuiteObject:
+        """
+        Makes a POST request to the NetSuite REST API using the specified URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        """
         return self._make_request(http_method="POST", **kwargs)
 
     def delete(self, **kwargs) -> NetsuiteObject:
+        """
+        Makes a DELETE request to the NetSuite REST API using the specified URL, headers, and parameters. Returns a NetsuiteObject containing the response data.
+        """
         return self._make_request(http_method="DELETE", **kwargs)
