@@ -14,7 +14,7 @@ log.setLevel(logging.DEBUG)
 class NetsuiteObject:
     url: Optional[str] = None
     request_headers: Optional[dict] = None
-    request_data: Optional[dict] = None
+    request_data: Optional[dict | str] = None
     response: str = None
     code: int = None
 
@@ -34,7 +34,7 @@ class NetSuite(object):
     nt = NetSuite(
         account_id=123456,
         consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
-        token_keys=dict(token_id="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
+        token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
     )
 
     x = nt.get(
@@ -55,7 +55,7 @@ class NetSuite(object):
             consumer_keys, ["consumer_key", "consumer_secret"]
         ).values()
         self.token_id, self.token_secret = self._validate_keys(
-            token_keys, ["token_id", "token_secret"]
+            token_keys, ["token_key", "token_secret"]
         ).values()
         self._request_session = None
 
