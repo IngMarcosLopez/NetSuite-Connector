@@ -25,7 +25,7 @@ Fields:
 - account_id: The account ID used for authentication.
 - consumer_key: The consumer key used for authentication.
 - consumer_secret: The consumer secret used for authentication.
-- token_id: The token ID used for authentication.
+- token_key: The token ID used for authentication.
 - token_secret: The token secret used for authentication.
 - _request_session: The OAuth1Session object used for making requests to the NetSuite REST API.
 """
@@ -45,7 +45,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params)
 
@@ -69,7 +69,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.put(url=url, headers=headers, params=params, body=body)
 
@@ -88,7 +88,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
 
         # Assert
@@ -104,7 +104,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
 
         # Assert
@@ -126,7 +126,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params, body=body)
 
@@ -150,7 +150,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.post(url=url, headers=headers, params=params, body=body)
 
@@ -173,7 +173,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.delete(url=url, headers=headers, params=params)
 
@@ -196,7 +196,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params)
 
@@ -219,7 +219,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params)
 
@@ -243,7 +243,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params, body=body)
 
@@ -266,7 +266,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
-            token_keys=dict(token_id="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
+            token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
         )
         result = ns.get(url=url, headers=headers, params=params)
 
@@ -289,7 +289,7 @@ class TestNetSuite:
         ns = NetSuite(
             account_id=123456,
             consumer_keys={"consumer_key": "", "consumer_secret": ""},
-            token_keys={"token_id": "", "token_secret": ""},
+            token_keys={"token_key": "", "token_secret": ""},
         )
         result = ns.get(url=url, headers=headers, params=params)
 
