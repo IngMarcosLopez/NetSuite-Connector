@@ -1,105 +1,14 @@
-import base64
-import hashlib
-import hmac
-import random
-import time
 import traceback
-from dataclasses import asdict, dataclass
-from typing import Any, List, Optional
+from typing import Any
 
-import pandas as pd
-import pyodbc
+from .NetSuite import NetSuite, NetsuiteObject
 
 
-@dataclass
-class NetsuiteObject:
-    status: Optional[int] = 200
-    data_received: Optional[str] = None
-    columns: Optional[List[str]] = None
-    response: Optional[List[dict]] = None
+class ODBC(NetSuite):
 
-    @property
-    def json(self):
-        return asdict(self)
-
-
-class ODBC(object):
-    ServiceHost = ".connect.api.netsuite.com"
-
-    def __init__(
-        self,
-        account_id: Any,
-        user_email: str,
-        role_id: int,
-        dsn: str,
-        password: str = None,
-        consumer_keys: dict = {},
-        token_keys: dict = {},
-    ) -> None:
-        self.oauth_version = "1.0"
-        self.signature_method = "HMAC-SHA256"
-        self.account_id = account_id
-        self.user = user_email
-        self.role_id = role_id
-        self.dsn = dsn
-        self.password = password
-        self.consumer_key = (
-            consumer_keys["consumer_key"]
-            if consumer_keys and "consumer_key" in consumer_keys
-            else None
-        )
-        self.consumer_secret = (
-            consumer_keys["consumer_secret"]
-            if consumer_keys and "consumer_secret" in consumer_keys
-            else None
-        )
-        self.token_id = (
-            token_keys["token_key"]
-            if token_keys and "token_key" in token_keys
-            else None
-        )
-        self.token_secret = (
-            token_keys["token_secret"]
-            if token_keys and "token_secret" in token_keys
-            else None
-        )
-
-    @staticmethod
-    def generate_nonce(length=20):
-        """Generate pseudo-random number."""
-        word_characters = (
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        )
-        return "".join(
-            [
-                word_characters[random.randint(0, len(word_characters) - 1)]
-                for i in range(length)
-            ]
-        )
-
-    @staticmethod
-    def generate_timestamp():
-        """Get seconds since epoch (UTC)."""
-        return str(int(time.time()))
-
-    def _make_password(self):
-        base_string = "&".join(
-            [
-                self.account_id,
-                self.consumer_key,
-                self.token_id,
-                self.generate_nonce(),
-                self.generate_timestamp(),
-            ]
-        )
-        signature_key = "&".join([self.consumer_secret, self.token_secret])
-        digest = hmac.new(
-            bytes(signature_key, "ascii"), base_string.encode(), hashlib.sha256
-        ).digest()
-        signature = f"{base64.b64encode(digest).decode()}&HMAC-SHA256"
-
-        token_password = f"{base_string}&{signature}"
-        return token_password
+    def __init__(self, account_id: Any, consumer_keys: dict, token_keys: dict) -> None:
+        super().__init__(account_id, consumer_keys, token_keys)
+        self.suiteql_endpoint = f'https://{account_id.lower().replace("-", "")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
 
     def query(self, query: str) -> NetsuiteObject:
         """
@@ -107,31 +16,25 @@ class ODBC(object):
         query: fully qualified sql query
         >>> from NetSuite_Connector.ODBC import ODBC
 
-        >>> nt = ODBC(account_id="*****", user_email="*****", role_id="*****", dsn="*****", password="*****")
-
-        >>> q = nt.query("SELECT * FROM OA_tables")
-        <NetSuite.NetsuiteObject>
-
-        >>> print(q.__dict__)
-        """
-        response = NetsuiteObject(data_received=query)
-        try:
-            conn_str = f"DSN={self.dsn};LogonID={self.user};PWD={self.password};RoleID:{self.role_id}"
-            conn = pyodbc.connect(conn_str)
-            cur = conn.cursor()
-            cur.execute(query)
-            head = cur.description
-            data = cur.fetchall()
-            cur.close()
-            conn.close()
-
-            df = pd.DataFrame(
-                data=[tuple(x) for x in data], columns=[i[0] for i in head]
+        >>> nt = ODBC(
+            account_id=123456,
+            consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
+            token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije")
             )
-            response.columns = [i[0] for i in head]
-            response.response = df.to_json(orient="records")
+
+        >>> q = nt.query("SELECT top 10 * FROM transaction")
+
+        >>> NetsuiteObject(url='https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx', request_headers={'Content-Type': 'application/json'}, response='{"foo":"bar"}', code=200)
+        """
+        response = NetsuiteObject(request_data=query)
+        try:
+            data = {"q": query}
+            headers = {"prefer": "transient", "Content-Type": "application/json"}
+            req = self.post(url=self.suiteql_endpoint, body=data, headers=headers)
+            response.response = req.response
+            response.code = req.code
         except Exception:
-            response.status = 500
+            response.code = 500
             response.response = traceback.format_exc()
 
         return response
