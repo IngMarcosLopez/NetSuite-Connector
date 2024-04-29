@@ -8,7 +8,7 @@ class ODBC(NetSuite):
 
     def __init__(self, account_id: Any, consumer_keys: dict, token_keys: dict) -> None:
         super().__init__(account_id, consumer_keys, token_keys)
-        self.suiteql_endpoint = f'https://{account_id.lower().replace("-", "")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
+        self.suiteql_endpoint = f'https://{account_id.lower().replace("_", "-")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
 
     def query(self, query: str) -> NetsuiteObject:
         """
