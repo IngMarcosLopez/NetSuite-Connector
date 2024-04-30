@@ -26,7 +26,7 @@ class NetsuiteObject:
         return asdict(self)
 
 
-class NetSuite(object):
+class NetSuite:
     """
     The NetSuite class is a Python wrapper for the NetSuite REST API. It provides methods for making HTTP requests to the NetSuite REST API using OAuth 1.0 authentication. The class supports GET, PUT, POST, and DELETE HTTP methods. The class also provides error handling for failed requests.
     ```
@@ -82,12 +82,22 @@ class NetSuite(object):
         self,
         http_method: str,
         url: str,
-        headers: dict[str, str] = {},
-        params: dict[str, Any] = {},
-        body: dict[str, Any] = {},
+        headers: Optional[dict[str, str]] = None,
+        params: Optional[dict[str, Any]] = None,
+        body: Optional[dict[str, Any]] = None,
     ) -> NetsuiteObject:
         """
-        Makes an HTTP request to the NetSuite REST API using the specified HTTP method, URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        Makes an HTTP request to the NetSuite REST API using the specified HTTP method, URL, headers, parameters, and body.
+
+        Parameters:
+            http_method (str): The HTTP method to use for the request.
+            url (str): The URL of the NetSuite REST API endpoint to which the request will be sent.
+            headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to {}.
+            params (dict[str, Any], optional): A dictionary of parameters to include in the request. Defaults to {}.
+            body (dict[str, Any], optional): A dictionary of data to include in the request body. Defaults to {}.
+
+        Returns:
+            NetsuiteObject: A NetsuiteObject containing the response data.
         """
         log.debug("Making request to restlet at %s.", url)
         log.debug("Payload: %s", body)
@@ -114,24 +124,63 @@ class NetSuite(object):
 
     def get(self, **kwargs) -> NetsuiteObject:
         """
-        Makes a GET request to the NetSuite REST API using the specified URL, headers, and parameters. Returns a NetsuiteObject containing the response data.
+        Makes a GET request to the NetSuite REST API using the specified URL, headers, and parameters.
+
+        Parameters:
+            http_method (str): The HTTP method to use for the request.
+            url (str): The URL of the NetSuite REST API endpoint to which the request will be sent.
+            headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to {}.
+            params (dict[str, Any], optional): A dictionary of parameters to include in the request. Defaults to {}.
+
+        Returns:
+            NetsuiteObject: A NetsuiteObject containing the response data.
         """
         return self._make_request(http_method="GET", **kwargs)
 
     def put(self, **kwargs) -> NetsuiteObject:
         """
-        Makes a PUT request to the NetSuite REST API using the specified URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        Makes a PUT request to the NetSuite REST API using the specified URL, headers, parameters, and body.
+
+        Parameters:
+            http_method (str): The HTTP method to use for the request.
+            url (str): The URL of the NetSuite REST API endpoint to which the request will be sent.
+            headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to {}.
+            params (dict[str, Any], optional): A dictionary of parameters to include in the request. Defaults to {}.
+            body (dict[str, Any], optional): A dictionary of data to include in the request body. Defaults to {}.
+
+        Returns:
+            NetsuiteObject: A NetsuiteObject containing the response data.
         """
         return self._make_request(http_method="PUT", **kwargs)
 
     def post(self, **kwargs) -> NetsuiteObject:
         """
-        Makes a POST request to the NetSuite REST API using the specified URL, headers, parameters, and body. Returns a NetsuiteObject containing the response data.
+        Makes a POST request to the NetSuite REST API using the specified URL, headers, parameters, and body.
+
+        Parameters:
+            http_method (str): The HTTP method to use for the request.
+            url (str): The URL of the NetSuite REST API endpoint to which the request will be sent.
+            headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to {}.
+            params (dict[str, Any], optional): A dictionary of parameters to include in the request. Defaults to {}.
+            body (dict[str, Any], optional): A dictionary of data to include in the request body. Defaults to {}.
+
+        Returns:
+            NetsuiteObject: A NetsuiteObject containing the response data.
         """
         return self._make_request(http_method="POST", **kwargs)
 
     def delete(self, **kwargs) -> NetsuiteObject:
         """
-        Makes a DELETE request to the NetSuite REST API using the specified URL, headers, and parameters. Returns a NetsuiteObject containing the response data.
+        Makes a DELETE request to the NetSuite REST API using the specified URL, headers, and parameters.
+
+        Parameters:
+            http_method (str): The HTTP method to use for the request.
+            url (str): The URL of the NetSuite REST API endpoint to which the request will be sent.
+            headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to {}.
+            params (dict[str, Any], optional): A dictionary of parameters to include in the request. Defaults to {}.
+            body (dict[str, Any], optional): A dictionary of data to include in the request body. Defaults to {}.
+
+        Returns:
+            NetsuiteObject: A NetsuiteObject containing the response data.
         """
         return self._make_request(http_method="DELETE", **kwargs)
