@@ -32,7 +32,7 @@ class OAuth2Config:
         """Validate and format account ID according to NetSuite requirements."""
         if not self.account_id:
             raise ValueError("Account ID is required")
-        
+
         # Account ID should be in format like TSTDRV123456 or 123456_SB1
         # For REST endpoints, we need to format it properly (lowercase with hyphens)
         self.formatted_account_id = self.account_id.lower().replace("_", "-")
@@ -40,137 +40,101 @@ class OAuth2Config:
 
 class NetSuiteOAuth2:
     """
-    NetSuite OAuth 2.0 Machine-to-Machine (M2M) authentication using private key and certificate ID.
-
-    Usage:
-    ```python
-    from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
-
-    config = OAuth2Config(
-        account_id="123456",
-        client_id="your_client_id",
-        certificate_id="your_certificate_id",
-        private_key="-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----",
-        scope="restlets,rest_webservices"
-    )
-
-    oauth2_client = NetSuiteOAuth2(config)
-    token = oauth2_client.get_access_token()
-    ```
+    NetSuite OAuth 2.0 client using JWT client assertion.
     """
 
     def __init__(self, config: OAuth2Config):
         self.config = config
-        self.access_token = None
-        self.token_expires_at = None
-        self._private_key = None
-        self._load_private_key()
-
-    def _load_private_key(self):
-        """Load the private key from PEM format string."""
-        try:
-            self._private_key = serialization.load_pem_private_key(
-                self.config.private_key.encode(),
-                password=None,
-                backend=default_backend(),
-            )
-        except Exception as e:
-            log.error(f"Failed to load private key: {e}")
-            raise ValueError("Invalid private key format") from e
+        self._access_token = None
+        self._token_expires_at = None
 
     def _create_jwt_assertion(self) -> str:
-        """Create JWT assertion for OAuth 2.0 client credentials flow."""
-        now = int(time.time())
-
+        """Create JWT client assertion for OAuth 2.0 token request."""
         # JWT Header
         header = {"alg": "RS256", "typ": "JWT", "kid": self.config.certificate_id}
 
-        # JWT Payload
+        # JWT Payload - Updated to use formatted_account_id for token endpoint
+        now = int(time.time())
         payload = {
             "iss": self.config.client_id,
             "sub": self.config.client_id,
-            "aud": "https://system.netsuite.com/app/login/oauth2/token.nl",
+            "aud": f"https://{self.config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token",
+            "exp": now + 300,  # 5 minutes from now
             "iat": now,
-            "exp": now + 300,  # 5 minutes expiration
-            "jti": secrets.token_urlsafe(32),
+            "jti": secrets.token_hex(16),
         }
 
         # Encode header and payload
-        header_encoded = (
-            base64.urlsafe_b64encode(json.dumps(header, separators=(",", ":")).encode())
-            .decode()
-            .rstrip("=")
+        header_encoded = base64.urlsafe_b64encode(
+            json.dumps(header).encode("utf-8")
+        ).decode("utf-8").rstrip('=')
+        payload_encoded = base64.urlsafe_b64encode(
+            json.dumps(payload).encode("utf-8")
+        ).decode("utf-8").rstrip('=')
+
+        # Create signature
+        message = f"{header_encoded}.{payload_encoded}"
+        signature = self._sign_message(message)
+
+        return f"{message}.{signature}"
+
+    def _sign_message(self, message: str) -> str:
+        """Sign message with private key."""
+        # Load private key
+        private_key = serialization.load_pem_private_key(
+            self.config.private_key.encode("utf-8"),
+            password=None,
+            backend=default_backend(),
         )
 
-        payload_encoded = (
-            base64.urlsafe_b64encode(
-                json.dumps(payload, separators=(",", ":")).encode()
-            )
-            .decode()
-            .rstrip("=")
+        # Sign message
+        signature = private_key.sign(
+            message.encode("utf-8"), 
+            padding.PKCS1v15(), 
+            hashes.SHA256()
         )
 
-        # Create signing input
-        signing_input = f"{header_encoded}.{payload_encoded}"
+        return base64.urlsafe_b64encode(signature).decode("utf-8").rstrip('=')
 
-        # Sign with private key
-        signature = self._private_key.sign(
-            signing_input.encode(), padding.PKCS1v15(), hashes.SHA256()
-        )
-
-        signature_encoded = base64.urlsafe_b64encode(signature).decode().rstrip("=")
-
-        return f"{signing_input}.{signature_encoded}"
-
-    def get_access_token(self) -> str | None:
-        """Get access token using OAuth 2.0 client credentials flow."""
-        # Check if we have a valid token
-        if (
-            self.access_token
-            and self.token_expires_at
-            and time.time() < self.token_expires_at
-        ):
-            return self.access_token
+    def get_access_token(self) -> str:
+        """Get access token using JWT client assertion."""
+        # Check if token is still valid
+        if self._access_token and self._token_expires_at and time.time() < self._token_expires_at:
+            return self._access_token
 
         try:
             # Create JWT assertion
-            assertion = self._create_jwt_assertion()
+            jwt_assertion = self._create_jwt_assertion()
 
-            # Token endpoint
-            token_url = "https://system.netsuite.com/app/login/oauth2/token.nl"
+            # Token request - Updated to use formatted_account_id
+            token_url = f"https://{self.config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token"
 
-            # Request parameters
             data = {
                 "grant_type": "client_credentials",
                 "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                "client_assertion": assertion,
-                "scope": self.config.scope,
+                "client_assertion": jwt_assertion,
             }
 
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Accept": "application/json",
+                "Accept": "application/json"
             }
 
-            log.debug(f"Requesting token from {token_url}")
-            response = requests.post(token_url, data=data, headers=headers, timeout=300)
+            response = requests.post(token_url, data=data, headers=headers, timeout=30)
+            response.raise_for_status()
 
-            if response.status_code == 200:
-                token_data = response.json()
-                self.access_token = token_data.get("access_token")
-                expires_in = token_data.get("expires_in", 3600)
-                self.token_expires_at = (
-                    time.time() + expires_in - 60
-                )  # Refresh 1 minute early
-                log.debug("Successfully obtained access token")
-                return self.access_token
-            log.error(f"Token request failed: {response.status_code} - {response.text}")
-            return None
+            token_data = response.json()
+            self._access_token = token_data["access_token"]
+            # Set expiration with some buffer
+            expires_in = token_data.get("expires_in", 3600)
+            self._token_expires_at = time.time() + expires_in - 60  # 1 minute buffer
+
+            return self._access_token
 
         except Exception as e:
-            log.error(f"Failed to get access token: {e}")
+            log.error(f"Error getting access token: {str(e)}")
             log.error(traceback.format_exc())
-            return None
+            raise
 
     def make_authenticated_request(
         self,
