@@ -1,7 +1,10 @@
 
 import json
 import logging
+import traceback
 from typing import Any, Optional
+
+import requests
 
 from .OAuth2 import NetSuiteOAuth2, OAuth2Config
 from .NetSuite import NetsuiteObject
@@ -11,13 +14,10 @@ log = logging.getLogger(__name__)
 
 class NetSuiteOAuth2Client:
     """
-    NetSuite OAuth 2.0 client wrapper that provides the same interface as the original NetSuite class
-    but uses OAuth 2.0 M2M authentication instead of OAuth 1.0 TBA.
+    OAuth 2.0 client for NetSuite REST API operations.
     
     Usage:
     ```python
-    from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
-    
     client = NetSuiteOAuth2Client(
         account_id="123456",
         client_id="your_client_id",
@@ -25,10 +25,7 @@ class NetSuiteOAuth2Client:
         private_key="-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----"
     )
     
-    response = client.get(
-        url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
-        headers={"Content-Type": "application/json"}
-    )
+    response = client.get(url="https://xxxx.restlets.api.netsuite.com/...", headers={"Content-Type": "application/json"})
     ```
     """
     
@@ -40,6 +37,7 @@ class NetSuiteOAuth2Client:
         private_key: str,
         scope: str = "restlets,rest_webservices"
     ):
+        self.account_id = account_id
         config = OAuth2Config(
             account_id=account_id,
             client_id=client_id,
@@ -48,16 +46,63 @@ class NetSuiteOAuth2Client:
             scope=scope
         )
         self.oauth2_client = NetSuiteOAuth2(config)
-        self.account_id = account_id
     
-    def get(self, url: str, headers: Optional[dict] = None, params: Optional[dict] = None) -> NetsuiteObject:
-        """Make a GET request to NetSuite REST API."""
-        return self.oauth2_client.make_authenticated_request(
-            method="GET",
-            url=url,
-            headers=headers,
-            params=params
-        )
+    def _make_request(
+        self,
+        method: str,
+        url: str,
+        headers: Optional[dict] = None,
+        params: Optional[dict] = None,
+        body: Optional[Any] = None
+    ) -> NetsuiteObject:
+        """Make an authenticated request to NetSuite."""
+        response = NetsuiteObject(url=url, request_headers=headers, request_data=body)
+        
+        try:
+            # Get access token
+            access_token = self.oauth2_client.get_access_token()
+            
+            # Prepare headers
+            if headers is None:
+                headers = {}
+            headers["Authorization"] = f"Bearer {access_token}"
+            
+            # Prepare request data
+            request_kwargs = {
+                "url": url,
+                "headers": headers,
+                "params": params
+            }
+            
+            if body is not None:
+                if isinstance(body, dict):
+                    request_kwargs["json"] = body
+                else:
+                    request_kwargs["data"] = body
+            
+            # Make request
+            req = requests.request(method, **request_kwargs)
+            
+            response.response = req.text
+            response.code = req.status_code
+            response.request_headers = headers
+            
+        except Exception as e:
+            log.error(f"Error making {method} request: {str(e)}")
+            log.error(traceback.format_exc())
+            response.response = f"Error: {str(e)}"
+            response.code = 500
+            
+        return response
+    
+    def get(
+        self,
+        url: str,
+        headers: Optional[dict] = None,
+        params: Optional[dict] = None
+    ) -> NetsuiteObject:
+        """Make a GET request."""
+        return self._make_request("GET", url, headers, params)
     
     def post(
         self,
@@ -66,23 +111,8 @@ class NetSuiteOAuth2Client:
         params: Optional[dict] = None,
         body: Optional[Any] = None
     ) -> NetsuiteObject:
-        """Make a POST request to NetSuite REST API."""
-        if isinstance(body, (dict, list)):
-            return self.oauth2_client.make_authenticated_request(
-                method="POST",
-                url=url,
-                headers=headers,
-                params=params,
-                json_data=body
-            )
-        else:
-            return self.oauth2_client.make_authenticated_request(
-                method="POST",
-                url=url,
-                headers=headers,
-                params=params,
-                data=body
-            )
+        """Make a POST request."""
+        return self._make_request("POST", url, headers, params, body)
     
     def put(
         self,
@@ -91,29 +121,14 @@ class NetSuiteOAuth2Client:
         params: Optional[dict] = None,
         body: Optional[Any] = None
     ) -> NetsuiteObject:
-        """Make a PUT request to NetSuite REST API."""
-        if isinstance(body, (dict, list)):
-            return self.oauth2_client.make_authenticated_request(
-                method="PUT",
-                url=url,
-                headers=headers,
-                params=params,
-                json_data=body
-            )
-        else:
-            return self.oauth2_client.make_authenticated_request(
-                method="PUT",
-                url=url,
-                headers=headers,
-                params=params,
-                data=body
-            )
+        """Make a PUT request."""
+        return self._make_request("PUT", url, headers, params, body)
     
-    def delete(self, url: str, headers: Optional[dict] = None, params: Optional[dict] = None) -> NetsuiteObject:
-        """Make a DELETE request to NetSuite REST API."""
-        return self.oauth2_client.make_authenticated_request(
-            method="DELETE",
-            url=url,
-            headers=headers,
-            params=params
-        )
+    def delete(
+        self,
+        url: str,
+        headers: Optional[dict] = None,
+        params: Optional[dict] = None
+    ) -> NetsuiteObject:
+        """Make a DELETE request."""
+        return self._make_request("DELETE", url, headers, params)

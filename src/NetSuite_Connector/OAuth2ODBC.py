@@ -53,6 +53,17 @@ class OAuth2ODBC(NetSuiteOAuth2Client):
             headers = {"prefer": "transient", "Content-Type": "application/json"}
             
             req = self.post(url=self.suiteql_endpoint, body=data, headers=headers)
+            
+            response.url = self.suiteql_endpoint
+            response.request_headers = headers
+            response.response = req.response
+            response.code = req.code
+            
+        except Exception as e:
+            response.response = f"Error executing query: {str(e)}"
+            response.code = 500
+            
+        return response
             response.response = req.response
             response.code = req.code
             response.url = req.url

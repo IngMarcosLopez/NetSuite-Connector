@@ -1,3 +1,4 @@
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -5,6 +6,7 @@ import pytest
 from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
 from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
 from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
+from NetSuite_Connector.NetSuite import NetsuiteObject
 
 
 class TestOAuth2:
@@ -117,3 +119,81 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
 
         expected_endpoint = f'https://{oauth2_config.account_id.lower().replace("_", "-")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
         assert odbc.suiteql_endpoint == expected_endpoint
+
+    @patch("requests.post")
+    @patch("requests.request")
+    def test_oauth2_odbc_query_success(self, mock_request, mock_post, oauth2_config):
+        # Mock token response
+        mock_token_response = Mock()
+        mock_token_response.status_code = 200
+        mock_token_response.json.return_value = {
+            "access_token": "test_token",
+            "expires_in": 3600,
+        }
+        mock_post.return_value = mock_token_response
+
+        # Mock SuiteQL response
+        mock_api_response = Mock()
+        mock_api_response.status_code = 200
+        mock_api_response.text = '{"items": [{"id": 1, "name": "test"}], "hasMore": false}'
+        mock_request.return_value = mock_api_response
+
+        odbc = OAuth2ODBC(
+            account_id=oauth2_config.account_id,
+            client_id=oauth2_config.client_id,
+            certificate_id=oauth2_config.certificate_id,
+            private_key=oauth2_config.private_key,
+        )
+
+        result = odbc.query("SELECT TOP 10 * FROM transaction")
+
+        assert isinstance(result, NetsuiteObject)
+        assert result.code == 200
+        assert '"items"' in result.response
+
+    @patch("requests.post")
+    @patch("requests.request")
+    def test_oauth2_odbc_query_error(self, mock_request, mock_post, oauth2_config):
+        # Mock token response
+        mock_token_response = Mock()
+        mock_token_response.status_code = 200
+        mock_token_response.json.return_value = {
+            "access_token": "test_token",
+            "expires_in": 3600,
+        }
+        mock_post.return_value = mock_token_response
+
+        # Mock SuiteQL error response
+        mock_api_response = Mock()
+        mock_api_response.status_code = 400
+        mock_api_response.text = '{"error": {"code": "INVALID_QUERY", "message": "Invalid query"}}'
+        mock_request.return_value = mock_api_response
+
+        odbc = OAuth2ODBC(
+            account_id=oauth2_config.account_id,
+            client_id=oauth2_config.client_id,
+            certificate_id=oauth2_config.certificate_id,
+            private_key=oauth2_config.private_key,
+        )
+
+        result = odbc.query("SELECT INVALID QUERY")
+
+        assert isinstance(result, NetsuiteObject)
+        assert result.code == 400
+        assert "error" in result.response
+
+    def test_oauth2_token_error_handling(self, oauth2_config):
+        with patch("requests.post") as mock_post:
+            # Mock failed token response
+            mock_response = Mock()
+            mock_response.status_code = 400
+            mock_response.json.return_value = {
+                "error": "invalid_client",
+                "error_description": "Invalid client credentials"
+            }
+            mock_post.return_value = mock_response
+
+            oauth2_client = NetSuiteOAuth2(oauth2_config)
+            
+            with pytest.raises(Exception):
+                oauth2_client.get_access_token()

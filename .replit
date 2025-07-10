@@ -7,3 +7,15 @@ packages = ["glibcLocales", "unixODBC"]
 
 [deployment]
 run = ["sh", "-c", "python -m pip list --outdated"]
+
+[workflows]
+runButton = "Run Tests"
+
+[[workflows.workflow]]
+name = "Run Tests"
+author = 44869599
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m pytest tests/ -v"
