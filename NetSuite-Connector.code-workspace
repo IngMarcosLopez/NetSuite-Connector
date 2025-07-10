@@ -1,0 +1,54 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.formatOnPaste": true,
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "explicit",
+			"source.fixAll": "explicit",
+			"source.removeUnusedImports": "explicit"
+		},
+		"pylint.args": [
+			"--disable=W0108,E501"
+		],
+		"python.testing.pytestArgs": [
+			"."
+		],
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true,
+		"testing.coverageBarThresholds": {
+			"red": 0,
+			"yellow": 60,
+			"green": 90
+		},
+		"testing.showCoverageInExplorer": true,
+		"testing.displayedCoveragePercent": "totalCoverage",
+		"testing.automaticallyOpenTestResults": "openExplorerOnTestStart"
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "generate_requirements",
+				"type": "shell",
+				"command": "./poetry-requirements.sh",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"presentation": {
+					"reveal": "always",
+					"panel": "new"
+				},
+				"problemMatcher": [],
+				"options": {
+					"env": {}
+				}
+			}
+		]
+	},
+}
