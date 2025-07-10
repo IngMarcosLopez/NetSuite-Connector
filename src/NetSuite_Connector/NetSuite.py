@@ -1,9 +1,11 @@
+# Standard Python Libraries
+from dataclasses import asdict, dataclass
 import json
 import logging
 import traceback
-from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
+# Third-Party Libraries
 import requests_oauthlib as oauth
 
 log = logging.getLogger(__name__)
@@ -12,9 +14,9 @@ log.setLevel(logging.DEBUG)
 
 @dataclass
 class NetsuiteObject:
-    url: Optional[str] = None
-    request_headers: Optional[dict] = None
-    request_data: Optional[dict | str] = None
+    url: str | None = None
+    request_headers: dict | None = None
+    request_data: dict | str | None = None
     response: str = None
     code: int = None
 
@@ -82,9 +84,9 @@ class NetSuite:
         self,
         http_method: str,
         url: str,
-        headers: Optional[dict[str, str]] = None,
-        params: Optional[dict[str, Any]] = None,
-        body: Optional[dict[str, Any]] = None,
+        headers: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
+        body: dict[str, Any] | None = None,
     ) -> NetsuiteObject:
         """
         Makes an HTTP request to the NetSuite REST API using the specified HTTP method, URL, headers, parameters, and body.
@@ -112,6 +114,7 @@ class NetSuite:
                 data=(json.dumps(body) if isinstance(body, (dict, list)) else body),
                 params=params,
                 headers=headers,
+                timeout=300,
             )
             log.debug("Got response headers: %s", json.dumps(dict(resp.headers)))
             response.response = resp.text

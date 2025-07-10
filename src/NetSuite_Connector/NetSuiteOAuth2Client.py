@@ -1,7 +1,9 @@
+# Standard Python Libraries
 import logging
 import traceback
-from typing import Any, Optional
+from typing import Any
 
+# Third-Party Libraries
 import requests
 
 from .NetSuite import NetsuiteObject
@@ -49,9 +51,9 @@ class NetSuiteOAuth2Client:
         self,
         method: str,
         url: str,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        body: Optional[Any] = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        body: Any | None = None,
     ) -> NetsuiteObject:
         """Make an authenticated request to NetSuite."""
         response = NetsuiteObject(url=url, request_headers=headers, request_data=body)
@@ -75,7 +77,7 @@ class NetSuiteOAuth2Client:
                     request_kwargs["data"] = body
 
             # Make request
-            req = requests.request(method, **request_kwargs)
+            req = requests.request(method, timeout=300, **request_kwargs)
 
             response.response = req.text
             response.code = req.status_code
@@ -90,7 +92,7 @@ class NetSuiteOAuth2Client:
         return response
 
     def get(
-        self, url: str, headers: Optional[dict] = None, params: Optional[dict] = None
+        self, url: str, headers: dict | None = None, params: dict | None = None
     ) -> NetsuiteObject:
         """Make a GET request."""
         return self._make_request("GET", url, headers, params)
@@ -98,9 +100,9 @@ class NetSuiteOAuth2Client:
     def post(
         self,
         url: str,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        body: Optional[Any] = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        body: Any | None = None,
     ) -> NetsuiteObject:
         """Make a POST request."""
         return self._make_request("POST", url, headers, params, body)
@@ -108,15 +110,15 @@ class NetSuiteOAuth2Client:
     def put(
         self,
         url: str,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        body: Optional[Any] = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        body: Any | None = None,
     ) -> NetsuiteObject:
         """Make a PUT request."""
         return self._make_request("PUT", url, headers, params, body)
 
     def delete(
-        self, url: str, headers: Optional[dict] = None, params: Optional[dict] = None
+        self, url: str, headers: dict | None = None, params: dict | None = None
     ) -> NetsuiteObject:
         """Make a DELETE request."""
         return self._make_request("DELETE", url, headers, params)

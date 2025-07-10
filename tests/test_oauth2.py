@@ -1,10 +1,14 @@
-
-import pytest
+# Standard Python Libraries
 from unittest.mock import Mock, patch
-from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
-from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
-from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
+
+# Third-Party Libraries
+import pytest
+
+# NTST-CONN Libraries
 from NetSuite_Connector.NetSuite import NetsuiteObject
+from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
+from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
+from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
 
 
 class TestOAuth2:
@@ -42,7 +46,7 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
             client_id="test_client_id",
             certificate_id="test_certificate_id",
             private_key=private_key,
-            scope="restlets,rest_webservices"
+            scope="restlets,rest_webservices",
         )
 
     @patch("requests.post")
@@ -125,7 +129,7 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
         response = client.post(
             url="https://test.restlets.api.netsuite.com/test",
             headers={"Content-Type": "application/json"},
-            body=body
+            body=body,
         )
 
         assert response.code == 200
@@ -211,7 +215,7 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
             account_id="TEST_123",
             client_id="client_123",
             certificate_id="cert_123",
-            private_key="test_key"
+            private_key="test_key",
         )
 
         assert config.account_id == "TEST_123"

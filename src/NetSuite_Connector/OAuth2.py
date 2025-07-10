@@ -1,16 +1,18 @@
+# Standard Python Libraries
 import base64
+from dataclasses import dataclass
 import json
 import logging
 import secrets
 import time
 import traceback
-from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-import requests
+# Third-Party Libraries
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+import requests
 
 from .NetSuite import NetsuiteObject
 
@@ -65,7 +67,7 @@ class NetSuiteOAuth2:
             )
         except Exception as e:
             log.error(f"Failed to load private key: {e}")
-            raise ValueError("Invalid private key format")
+            raise ValueError("Invalid private key format") from e
 
     def _create_jwt_assertion(self) -> str:
         """Create JWT assertion for OAuth 2.0 client credentials flow."""
@@ -111,7 +113,7 @@ class NetSuiteOAuth2:
 
         return f"{signing_input}.{signature_encoded}"
 
-    def get_access_token(self) -> Optional[str]:
+    def get_access_token(self) -> str | None:
         """Get access token using OAuth 2.0 client credentials flow."""
         # Check if we have a valid token
         if (
@@ -142,7 +144,7 @@ class NetSuiteOAuth2:
             }
 
             log.debug(f"Requesting token from {token_url}")
-            response = requests.post(token_url, data=data, headers=headers)
+            response = requests.post(token_url, data=data, headers=headers, timeout=300)
 
             if response.status_code == 200:
                 token_data = response.json()
@@ -153,11 +155,8 @@ class NetSuiteOAuth2:
                 )  # Refresh 1 minute early
                 log.debug("Successfully obtained access token")
                 return self.access_token
-            else:
-                log.error(
-                    f"Token request failed: {response.status_code} - {response.text}"
-                )
-                return None
+            log.error(f"Token request failed: {response.status_code} - {response.text}")
+            return None
 
         except Exception as e:
             log.error(f"Failed to get access token: {e}")
@@ -168,10 +167,10 @@ class NetSuiteOAuth2:
         self,
         method: str,
         url: str,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        data: Optional[Any] = None,
-        json_data: Optional[dict] = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        data: Any | None = None,
+        json_data: dict | None = None,
     ) -> NetsuiteObject:
         """Make an authenticated request to NetSuite REST API."""
         token = self.get_access_token()
@@ -203,6 +202,7 @@ class NetSuiteOAuth2:
                 params=params,
                 data=data,
                 json=json_data,
+                timeout=300,
             )
 
             response.response = resp.text
