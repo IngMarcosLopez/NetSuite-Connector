@@ -11,7 +11,7 @@ authors = [
 description = "NetSuite Connector"
 readme = "README.md"
 license = { file="LICENSE" }
-requires-python = ">=3.7"
+requires-python = ">=3.11,<4.0"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -21,3 +21,11 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/IngMarcosLopez/NetSuite-Connector"
 "Bug Tracker" = "https://github.com/IngMarcosLopez/NetSuite-Connector/issues"
+
+[tool.poetry.dependencies]
+setuptools = "^80.9.0"
+requests = "^2.32.4"
+requests-oauthlib = "^2.0.0"
+pyodbc = "^5.2.0"
+pandas = "^2.3.1"
+cryptography = "^45.0.5"
