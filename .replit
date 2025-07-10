@@ -1,0 +1,9 @@
+modules = ["python-3.12", "python-base-3.11", "python-3.11"]
+run = "python -m pip list --outdated"
+
+[nix]
+channel = "stable-24_05"
+packages = ["glibcLocales", "unixODBC"]
+
+[deployment]
+run = ["sh", "-c", "python -m pip list --outdated"]
