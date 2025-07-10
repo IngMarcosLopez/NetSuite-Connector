@@ -1,9 +1,9 @@
+from unittest.mock import Mock, patch
 
-import json
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
+
 from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
+from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
 from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
 
 
@@ -36,16 +36,16 @@ ZdMnP8EJqNnz+oRNPULYM7S6MxGzQWTfz9U8vQjJmzITKb6+a5kSgWV+V8kN8h
 QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
 2oSJ2uJQzPaVGYQKXXXJzfCQgN4kNgNbvkZJjmZKXxgRXJONJMsNkbNjMxbhpI
 -----END PRIVATE KEY-----"""
-        
+
         return OAuth2Config(
             account_id="123456",
             client_id="test_client_id",
             certificate_id="test_cert_id",
             private_key=private_key,
-            scope="restlets,rest_webservices"
+            scope="restlets,rest_webservices",
         )
-    
-    @patch('requests.post')
+
+    @patch("requests.post")
     def test_oauth2_get_access_token(self, mock_post, oauth2_config):
         # Mock successful token response
         mock_response = Mock()
@@ -53,67 +53,67 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
         mock_response.json.return_value = {
             "access_token": "test_access_token",
             "token_type": "Bearer",
-            "expires_in": 3600
+            "expires_in": 3600,
         }
         mock_post.return_value = mock_response
-        
+
         oauth2_client = NetSuiteOAuth2(oauth2_config)
         token = oauth2_client.get_access_token()
-        
+
         assert token == "test_access_token"
         assert mock_post.called
-        
+
     def test_oauth2_client_initialization(self, oauth2_config):
         client = NetSuiteOAuth2Client(
             account_id=oauth2_config.account_id,
             client_id=oauth2_config.client_id,
             certificate_id=oauth2_config.certificate_id,
-            private_key=oauth2_config.private_key
+            private_key=oauth2_config.private_key,
         )
-        
+
         assert client.account_id == oauth2_config.account_id
         assert client.oauth2_client.config.client_id == oauth2_config.client_id
-        
-    @patch('requests.post')
-    @patch('requests.request')
+
+    @patch("requests.post")
+    @patch("requests.request")
     def test_oauth2_client_get_request(self, mock_request, mock_post, oauth2_config):
         # Mock token response
         mock_token_response = Mock()
         mock_token_response.status_code = 200
         mock_token_response.json.return_value = {
             "access_token": "test_token",
-            "expires_in": 3600
+            "expires_in": 3600,
         }
         mock_post.return_value = mock_token_response
-        
+
         # Mock API response
         mock_api_response = Mock()
         mock_api_response.status_code = 200
         mock_api_response.text = '{"data": "test"}'
         mock_request.return_value = mock_api_response
-        
+
         client = NetSuiteOAuth2Client(
             account_id=oauth2_config.account_id,
             client_id=oauth2_config.client_id,
             certificate_id=oauth2_config.certificate_id,
-            private_key=oauth2_config.private_key
+            private_key=oauth2_config.private_key,
         )
-        
+
         response = client.get(
             url="https://test.restlets.api.netsuite.com/test",
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
-        
+
         assert response.code == 200
         assert response.response == '{"data": "test"}'
-        
+
     def test_oauth2_odbc_initialization(self, oauth2_config):
         odbc = OAuth2ODBC(
             account_id=oauth2_config.account_id,
             client_id=oauth2_config.client_id,
             certificate_id=oauth2_config.certificate_id,
-            private_key=oauth2_config.private_key
+            private_key=oauth2_config.private_key,
         )
-        
+
         expected_endpoint = f'https://{oauth2_config.account_id.lower().replace("_", "-")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
         assert odbc.suiteql_endpoint == expected_endpoint
