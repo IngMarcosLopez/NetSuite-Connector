@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "NetSuite-Connector"
-version = "0.3.1"
+version = "0.4.0"
 authors = [
   { name="Marcos Lopez", email="merick16@gmail.com" },
 ]
@@ -34,3 +34,7 @@ pytest = "^8.4.1"
 pre-commit = "^4.2.0"
 pylint = "^3.3.7"
 flake8 = "^7.3.0"
+
+[tool.poetry.group.release.dependencies]
+build = "^1.2.2.post1"
+twine = "^6.1.0"
