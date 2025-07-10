@@ -1,12 +1,11 @@
-import json
 from unittest.mock import Mock, patch
 
 import pytest
 
+from NetSuite_Connector.NetSuite import NetsuiteObject
 from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
 from NetSuite_Connector.OAuth2 import NetSuiteOAuth2, OAuth2Config
 from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
-from NetSuite_Connector.NetSuite import NetsuiteObject
 
 
 class TestOAuth2:
@@ -135,7 +134,9 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
         # Mock SuiteQL response
         mock_api_response = Mock()
         mock_api_response.status_code = 200
-        mock_api_response.text = '{"items": [{"id": 1, "name": "test"}], "hasMore": false}'
+        mock_api_response.text = (
+            '{"items": [{"id": 1, "name": "test"}], "hasMore": false}'
+        )
         mock_request.return_value = mock_api_response
 
         odbc = OAuth2ODBC(
@@ -166,7 +167,9 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
         # Mock SuiteQL error response
         mock_api_response = Mock()
         mock_api_response.status_code = 400
-        mock_api_response.text = '{"error": {"code": "INVALID_QUERY", "message": "Invalid query"}}'
+        mock_api_response.text = (
+            '{"error": {"code": "INVALID_QUERY", "message": "Invalid query"}}'
+        )
         mock_request.return_value = mock_api_response
 
         odbc = OAuth2ODBC(
@@ -189,11 +192,11 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
             mock_response.status_code = 400
             mock_response.json.return_value = {
                 "error": "invalid_client",
-                "error_description": "Invalid client credentials"
+                "error_description": "Invalid client credentials",
             }
             mock_post.return_value = mock_response
 
             oauth2_client = NetSuiteOAuth2(oauth2_config)
-            
+
             with pytest.raises(Exception):
                 oauth2_client.get_access_token()

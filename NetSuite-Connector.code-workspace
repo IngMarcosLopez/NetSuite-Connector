@@ -13,10 +13,20 @@
 			"source.removeUnusedImports": "explicit"
 		},
 		"pylint.args": [
-			"--disable=W0108,E501"
+			"--disable=W0108,C0103,C0114,C0115,C0116,C0301,R0902,R0913,R0917"
+		],
+		"mypy-type-checker.args": [
+			"--ignore-missing-imports",
+			"--follow-imports=silent",
+			"--show-error-codes",
+			"--ignore-assignments",
 		],
 		"python.testing.pytestArgs": [
 			"."
+		],
+		"flake8.args": [
+			"--max-line-length=88",
+			"--extend-ignore=E501,W503,E203"
 		],
 		"python.testing.unittestEnabled": false,
 		"python.testing.pytestEnabled": true,
