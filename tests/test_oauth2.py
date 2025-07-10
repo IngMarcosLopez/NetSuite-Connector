@@ -223,3 +223,51 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
         assert config.certificate_id == "cert_123"
         assert config.private_key == "test_key"
         assert config.scope == "restlets,rest_webservices"
+
+    def test_oauth2_odbc_query(self, mock_config, requests_mock):
+        """Test SuiteQL query execution."""
+        from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
+
+        # Mock the token endpoint
+        token_url = f"https://{mock_config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token"
+        requests_mock.post(token_url, json={"access_token": "test_token", "expires_in": 3600})
+
+        # Mock the SuiteQL endpoint
+        suiteql_url = f"https://{mock_config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql"
+        requests_mock.post(suiteql_url, json={"items": [{"id": 1, "name": "Test"}]}, status_code=200)
+
+        client = OAuth2ODBC(
+            account_id=mock_config.account_id,
+            client_id=mock_config.client_id,
+            certificate_id=mock_config.certificate_id,
+            private_key=mock_config.private_key
+        )
+
+        result = client.query("SELECT id, name FROM customer LIMIT 1")
+
+        assert result.code == 200
+        assert "Test" in result.response
+
+    def test_oauth2_odbc_get_records(self, mock_config, requests_mock):
+        """Test convenience method for getting records."""
+        from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
+
+        # Mock the token endpoint
+        token_url = f"https://{mock_config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token"
+        requests_mock.post(token_url, json={"access_token": "test_token", "expires_in": 3600})
+
+        # Mock the SuiteQL endpoint
+        suiteql_url = f"https://{mock_config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql"
+        requests_mock.post(suiteql_url, json={"items": [{"id": 1, "companyname": "Test Company"}]})
+
+        client = OAuth2ODBC(
+            account_id=mock_config.account_id,
+            client_id=mock_config.client_id,
+            certificate_id=mock_config.certificate_id,
+            private_key=mock_config.private_key
+        )
+
+        result = client.get_records('customer', ['id', 'companyname'], 'isperson = false', limit=10)
+
+        assert result.code == 200
+        assert "Test Company" in result.response

@@ -33,36 +33,61 @@ class OAuth2ODBC(NetSuiteOAuth2Client):
         # Use the formatted account ID from the OAuth2Config
         self.suiteql_endpoint = f'https://{self.oauth2_client.config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
 
-    def query(self, query: str) -> NetsuiteObject:
+    def query(self, query: str, limit: int = None, offset: int = None) -> NetsuiteObject:
         """
-        Execute a SuiteQL query using OAuth 2.0 authentication.
+        Perform a SuiteQL query using OAuth 2.0 authentication.
+
+        According to NetSuite documentation, SuiteQL supports:
+        - Standard SQL SELECT statements with NetSuite-specific syntax
+        - LIMIT and OFFSET for pagination
+        - Various built-in functions and operators
 
         Args:
-            query: Fully qualified SQL query
+            query: SuiteQL query string (e.g., "SELECT id, companyname FROM customer")
+            limit: Optional limit for result set pagination
+            offset: Optional offset for result set pagination
 
         Returns:
-            NetsuiteObject: Response containing query results
+            NetsuiteObject: Response object containing query results
+
+        Example:
+            >>> client = OAuth2ODBC(
+            ...     account_id="TSTDRV123456",
+            ...     client_id="your_client_id", 
+            ...     certificate_id="your_certificate_id",
+            ...     private_key="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+            ... )
+            >>> result = client.query("SELECT id, companyname FROM customer", limit=10)
+            >>> result = client.query("SELECT * FROM transaction WHERE trandate >= '2024-01-01'")
         """
-        response = NetsuiteObject(request_data=query)
+        response = NetsuiteObject(request_data=query, url=self.suiteql_endpoint)
 
         try:
-            data = {"q": query}
+            # Apply pagination if specified
+            final_query = query
+            if limit is not None:
+                if "LIMIT" not in query.upper():
+                    final_query += f" LIMIT {limit}"
+            if offset is not None:
+                if "OFFSET" not in query.upper():
+                    final_query += f" OFFSET {offset}"
+
+            data = {"q": final_query}
+
+            # Headers as per NetSuite SuiteQL documentation
             headers = {
-                "prefer": "transient",
                 "Content-Type": "application/json",
-            }  # ignore: E501
+                "Prefer": "transient"  # For non-persistent queries
+            }
 
-            req = self.post(
-                url=self.suiteql_endpoint, body=data, headers=headers
-            )  # ignore: E501
-
-            response.url = self.suiteql_endpoint
+            result = self.post(url=self.suiteql_endpoint, body=data, headers=headers)
+            response.response = result.response
+            response.code = result.code
             response.request_headers = headers
-            response.response = req.response
-            response.code = req.code
+            response.request_data = data
 
         except Exception as e:
-            response.response = f"Error executing query: {str(e)}"
             response.code = 500
+            response.response = f"SuiteQL query execution failed: {str(e)}"
 
         return response
