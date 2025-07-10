@@ -4,6 +4,8 @@
 
 - [SuiteTalk REST Web Services](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/book_1559132836.html)
 - [Restlets](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_4387799403.html#Related-Support-Articles)
+- OAuth 1.0 Token-Based Authentication (TBA)
+- OAuth 2.0 Machine-to-Machine (M2M) Authentication
 
 ## Installation
 
@@ -50,6 +52,66 @@ x = nt.post(
 )
 print(x)
 # NetsuiteObject(url='https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx', request_headers={'Content-Type': 'application/json'}, request_data={"foo":"bar"}, response='{"foo":"bar"}', code=200)
+```
+
+## OAuth 2.0 Machine-to-Machine (M2M) Authentication
+
+For OAuth 2.0 M2M authentication using private key and certificate ID:
+
+### OAuth 2.0 RESTlet GET
+
+```python
+from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
+
+client = NetSuiteOAuth2Client(
+    account_id="123456",
+    client_id="your_client_id",
+    certificate_id="your_certificate_id",
+    private_key="-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----"
+)
+
+response = client.get(
+    url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
+    headers={"Content-Type": "application/json"}
+)
+print(response)
+```
+
+### OAuth 2.0 RESTlet POST
+
+```python
+from NetSuite_Connector.NetSuiteOAuth2Client import NetSuiteOAuth2Client
+
+client = NetSuiteOAuth2Client(
+    account_id="123456",
+    client_id="your_client_id",
+    certificate_id="your_certificate_id",
+    private_key="-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----"
+)
+
+body = {"foo": "bar"}
+response = client.post(
+    url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
+    headers={"Content-Type": "application/json"},
+    body=body
+)
+print(response)
+```
+
+### OAuth 2.0 SuiteQL Queries
+
+```python
+from NetSuite_Connector.OAuth2ODBC import OAuth2ODBC
+
+odbc = OAuth2ODBC(
+    account_id="123456",
+    client_id="your_client_id",
+    certificate_id="your_certificate_id",
+    private_key="-----BEGIN PRIVATE KEY-----\n....\n-----END PRIVATE KEY-----"
+)
+
+result = odbc.query("SELECT TOP 10 * FROM transaction")
+print(result)
 ```
 
 # SuiteQL Queries
