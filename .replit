@@ -1,12 +1,21 @@
 modules = ["python-3.12", "python-base-3.11", "python-3.11"]
-run = "python -m pip list --outdated"
+run = "python -m pytest tests/ -v"
 
 [nix]
 channel = "stable-24_05"
-packages = ["glibcLocales", "unixODBC"]
+packages = [
+  "cargo",
+  "glibcLocales",
+  "libiconv",
+  "libxcrypt",
+  "openssl",
+  "pkg-config",
+  "rustc",
+  "unixODBC",
+]
 
 [deployment]
-run = ["sh", "-c", "python -m pip list --outdated"]
+run = ["sh", "-c", "python -m pytest tests/ -v"]
 
 [workflows]
 runButton = "Run Tests"
