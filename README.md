@@ -414,11 +414,19 @@ All methods handle exceptions gracefully and return error information in the `Ne
 ## Requirements
 
 - Python 3.11+
-- requests
-- requests-oauthlib
-- cryptography
-- pyodbc (for ODBC operations)
-- pandas (for data processing)
+- requests>=2.32.4
+- requests-oauthlib>=2.0.0
+- cryptography>=45.0.5
+- pandas>=2.3.1
+- numpy>=2.3.1
+- oauthlib>=3.3.1
+- setuptools>=80.9.0
+
+### Development/Testing Dependencies
+
+- pytest>=8.4.1
+- pytest-mock>=3.14.0
+- requests-mock>=1.12.1
 
 ## License
 
