@@ -42,8 +42,8 @@ QpwQEXJGMUoNhRzLfHpOlWGtOxGXLdqzgPKgTbdL9dPqz0QKBgQCVEj1lQNnKn
 -----END PRIVATE KEY-----"""
 
         return OAuth2Config(
-            account_id="TEST_ACCOUNT_123",
-            client_id="test_client_id",
+            account_id="TSTDRV123456_SB1",
+            client_id="test_client_id", 
             certificate_id="test_certificate_id",
             private_key=private_key,
             scope="restlets,rest_webservices",

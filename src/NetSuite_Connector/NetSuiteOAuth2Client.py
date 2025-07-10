@@ -47,6 +47,10 @@ class NetSuiteOAuth2Client:
         )
         self.oauth2_client = NetSuiteOAuth2(config)
 
+    def get_rest_base_url(self) -> str:
+        """Get the base URL for NetSuite REST API endpoints."""
+        return f"https://{self.oauth2_client.config.formatted_account_id}.suitetalk.api.netsuite.com"
+
     def _make_request(
         self,
         method: str,

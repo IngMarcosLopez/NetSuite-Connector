@@ -28,6 +28,15 @@ class OAuth2Config:
     private_key: str  # PEM format private key
     scope: str = "restlets,rest_webservices"
 
+    def __post_init__(self):
+        """Validate and format account ID according to NetSuite requirements."""
+        if not self.account_id:
+            raise ValueError("Account ID is required")
+        
+        # Account ID should be in format like TSTDRV123456 or 123456_SB1
+        # For REST endpoints, we need to format it properly (lowercase with hyphens)
+        self.formatted_account_id = self.account_id.lower().replace("_", "-")
+
 
 class NetSuiteOAuth2:
     """

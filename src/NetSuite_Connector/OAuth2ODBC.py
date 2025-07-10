@@ -30,7 +30,8 @@ class OAuth2ODBC(NetSuiteOAuth2Client):
         scope: str = "restlets,rest_webservices",
     ):
         super().__init__(account_id, client_id, certificate_id, private_key, scope)
-        self.suiteql_endpoint = f'https://{account_id.lower().replace("_", "-")}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
+        # Use the formatted account ID from the OAuth2Config
+        self.suiteql_endpoint = f'https://{self.oauth2_client.config.formatted_account_id}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql'
 
     def query(self, query: str) -> NetsuiteObject:
         """
