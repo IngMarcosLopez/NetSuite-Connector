@@ -3,16 +3,7 @@ run = "python -m pytest tests/ -v"
 
 [nix]
 channel = "stable-24_05"
-packages = [
-  "cargo",
-  "glibcLocales",
-  "libiconv",
-  "libxcrypt",
-  "openssl",
-  "pkg-config",
-  "rustc",
-  "unixODBC",
-]
+packages = ["cargo", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unixODBC"]
 
 [deployment]
 run = ["sh", "-c", "python -m pytest tests/ -v"]
