@@ -26,7 +26,6 @@ classifiers = [
 setuptools = "^80.9.0"
 requests = "^2.32.4"
 requests-oauthlib = "^2.0.0"
-pyodbc = "^5.2.0"
 pandas = "^2.3.1"
 cryptography = "^45.0.5"
 
