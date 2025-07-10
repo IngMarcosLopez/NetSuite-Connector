@@ -1,12 +1,12 @@
 modules = ["python-3.12", "python-base-3.11", "python-3.11"]
-run = "python -m pytest tests/ -v"
+run = "PYTHONPATH=src python -m pytest tests/ -v"
 
 [nix]
 channel = "stable-24_05"
 packages = ["cargo", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unixODBC"]
 
 [deployment]
-run = ["sh", "-c", "python -m pytest tests/ -v"]
+run = ["sh", "-c", "PYTHONPATH=src python -m pytest tests/ -v"]
 
 [workflows]
 runButton = "Run Tests"
@@ -18,4 +18,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python -m pytest tests/ -v"
+args = "PYTHONPATH=src python -m pytest tests/ -v"
