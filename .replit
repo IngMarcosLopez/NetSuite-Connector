@@ -7,3 +7,6 @@ packages = ["glibcLocales", "unixODBC"]
 
 [deployment]
 run = ["sh", "-c", "python -m pip list --outdated"]
+
+[agent]
+expertMode = true
