@@ -1,125 +1,162 @@
 # NetSuite-Connector
 
-A Python library for connecting to NetSuite via REST API, SuiteQL, and MCP (Model Context Protocol) for AI integration.
+<p align="center">
+  <strong>Connect to NetSuite from Python with ease</strong>
+</p>
 
-## Supports
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-ai-integration">AI Integration</a> •
+  <a href="#-api-reference">API Reference</a>
+</p>
 
-- [SuiteTalk REST Web Services](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/book_1559132836.html)
-- [Restlets](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_4387799403.html#Related-Support-Articles)
-- [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) for AI Integration
+---
 
-## Installation
+## What is NetSuite-Connector?
+
+NetSuite-Connector is a Python library that lets you connect to NetSuite ERP in three ways:
+
+| Method | Best For |
+|--------|----------|
+| **REST API** | Creating, reading, updating, and deleting records |
+| **SuiteQL** | Running SQL-like queries on your NetSuite data |
+| **MCP Server** | Letting AI assistants (like Claude) work with your NetSuite data |
+
+---
+
+## Quick Start
+
+### Step 1: Install
 
 ```bash
 pip install NetSuite-Connector
 ```
 
-## Get Started
+### Step 2: Get Your Credentials
 
-The following examples show how to use this module.
+You'll need these 5 values from your NetSuite account:
 
-### RESTlet GET
+| Credential | Where to Find It |
+|------------|------------------|
+| Account ID | Setup > Company > Company Information |
+| Consumer Key | Setup > Integration > Manage Integrations |
+| Consumer Secret | (Generated when creating integration) |
+| Token Key | Setup > Users/Roles > Access Tokens |
+| Token Secret | (Generated when creating token) |
 
-```python
-from NetSuite_Connector.NetSuite import NetSuite
-nt = NetSuite(
-    account_id=123456,
-    consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
-    token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
-)
-
-x = nt.get(
-    url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
-    headers={"Content-Type": "application/json"},
-    params={"foo":"bar"}
-)
-print(x)
-# NetsuiteObject(url='...', request_headers={...}, response='{"foo":"bar"}', code=200)
-```
-
-### RESTlet PUT - POST - DELETE
+### Step 3: Start Using It
 
 ```python
 from NetSuite_Connector.NetSuite import NetSuite
-nt = NetSuite(
-    account_id=123456,
-    consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
-    token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
+
+# Connect to NetSuite
+client = NetSuite(
+    account_id="123456_SB1",
+    consumer_keys={"consumer_key": "your_key", "consumer_secret": "your_secret"},
+    token_keys={"token_key": "your_token", "token_secret": "your_token_secret"}
 )
-body={"foo":"bar"}
-x = nt.post(
-    url="https://xxxx.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=xxxx&deploy=xxxx",
-    headers={"Content-Type": "application/json"},
-    params={},
-    body=body
-)
-print(x)
-```
 
-## SuiteQL Queries
-
-Execute SuiteQL queries through REST web services.
-
-```python
-from NetSuite_Connector.ODBC import ODBC
-
-nt = ODBC(
-    account_id=123456,
-    consumer_keys=dict(consumer_key="2345678", consumer_secret="3456yhg"),
-    token_keys=dict(token_key="wfdbfdsdfg", token_secret="efguhfjoidejhfije"),
-)
-q = nt.query("SELECT top 10 * FROM transaction")
-print(q)
+# Get a customer record
+result = client.get(url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123")
+print(result.response)
 ```
 
 ---
 
-## MCP Server Integration (AI Assistants)
+## Features
 
-The library includes an MCP (Model Context Protocol) server that allows AI assistants like Claude, ChatGPT, and custom agents to interact with NetSuite data using natural language.
+### REST API - Work with Records
 
-### Available MCP Tools
-
-| Tool | Description |
-|------|-------------|
-| `query_netsuite` | Execute SuiteQL queries |
-| `get_record` | Retrieve record by type and ID |
-| `create_record` | Create new NetSuite records |
-| `update_record` | Update existing records |
-| `delete_record` | Delete records |
-| `call_restlet` | Call custom RESTlet endpoints |
-| `list_records` | List records with pagination |
-| `run_saved_search` | Execute saved searches |
-
-### Option 1: Programmatic Usage
-
+**Get a record:**
 ```python
-from NetSuite_Connector.mcp_server import NetSuiteMCPServer
-
-# Initialize the MCP server
-server = NetSuiteMCPServer(
-    account_id="123456_SB1",
-    consumer_keys={"consumer_key": "xxx", "consumer_secret": "yyy"},
-    token_keys={"token_key": "aaa", "token_secret": "bbb"}
+result = client.get(
+    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123"
 )
-
-# List available tools
-tools = server.list_tools()
-print(f"Available tools: {[t['name'] for t in tools]}")
-
-# Call a tool
-result = server.call_tool("query_netsuite", {
-    "query": "SELECT TOP 10 id, companyname FROM customer"
-})
-print(result)
 ```
 
-### Option 2: Claude Desktop Integration
+**Create a record:**
+```python
+result = client.post(
+    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer",
+    body={"companyName": "Acme Corp", "email": "contact@acme.com"}
+)
+```
 
-Add to your Claude Desktop configuration file:
+**Update a record:**
+```python
+result = client.put(
+    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123",
+    body={"email": "newemail@acme.com"}
+)
+```
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Delete a record:**
+```python
+result = client.delete(
+    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123"
+)
+```
+
+---
+
+### SuiteQL - Query Your Data
+
+Run SQL-like queries to pull data from NetSuite:
+
+```python
+from NetSuite_Connector.ODBC import ODBC
+
+# Connect
+db = ODBC(
+    account_id="123456_SB1",
+    consumer_keys={"consumer_key": "your_key", "consumer_secret": "your_secret"},
+    token_keys={"token_key": "your_token", "token_secret": "your_token_secret"}
+)
+
+# Run a query
+result = db.query("SELECT id, companyname, email FROM customer WHERE isinactive = 'F'")
+print(result.response)
+```
+
+**Common queries:**
+
+| What You Want | Query |
+|---------------|-------|
+| Active customers | `SELECT * FROM customer WHERE isinactive = 'F'` |
+| Recent invoices | `SELECT * FROM invoice WHERE trandate >= '2024-01-01'` |
+| Open sales orders | `SELECT * FROM salesorder WHERE status = 'open'` |
+| Item list | `SELECT id, itemid, displayname FROM item` |
+
+---
+
+## AI Integration
+
+Let AI assistants like Claude interact with your NetSuite data using natural language.
+
+### What Can the AI Do?
+
+| Tool | What It Does |
+|------|--------------|
+| `query_netsuite` | Run SuiteQL queries |
+| `get_record` | Fetch a specific record |
+| `create_record` | Create new records |
+| `update_record` | Update existing records |
+| `delete_record` | Remove records |
+| `call_restlet` | Call custom scripts |
+| `list_records` | Browse records with filters |
+| `run_saved_search` | Execute saved searches |
+
+### Option A: Use with Claude Desktop
+
+**1. Find your config file:**
+
+| System | Location |
+|--------|----------|
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+
+**2. Add this configuration:**
 
 ```json
 {
@@ -128,76 +165,128 @@ Add to your Claude Desktop configuration file:
       "command": "python",
       "args": ["-m", "NetSuite_Connector"],
       "env": {
-        "NETSUITE_ACCOUNT_ID": "YOUR_ACCOUNT_ID",
-        "NETSUITE_CONSUMER_KEY": "YOUR_CONSUMER_KEY",
-        "NETSUITE_CONSUMER_SECRET": "YOUR_CONSUMER_SECRET",
-        "NETSUITE_TOKEN_KEY": "YOUR_TOKEN_KEY",
-        "NETSUITE_TOKEN_SECRET": "YOUR_TOKEN_SECRET"
+        "NETSUITE_ACCOUNT_ID": "your_account_id",
+        "NETSUITE_CONSUMER_KEY": "your_consumer_key",
+        "NETSUITE_CONSUMER_SECRET": "your_consumer_secret",
+        "NETSUITE_TOKEN_KEY": "your_token_key",
+        "NETSUITE_TOKEN_SECRET": "your_token_secret"
       }
     }
   }
 }
 ```
 
-Then in Claude, you can ask questions like:
-- "Show me the top 10 customers"
-- "Get invoice #12345"
-- "What's the total revenue this quarter?"
+**3. Restart Claude Desktop**
 
-### Option 3: CLI Usage
+**4. Ask Claude things like:**
+- "Show me the top 10 customers by revenue"
+- "Get invoice number 12345"
+- "What sales orders are pending this week?"
+- "Create a new customer record for Acme Corp"
 
-```bash
-# Check configuration
-python -m NetSuite_Connector --check-config
+### Option B: Use in Your Python Code
+
+```python
+from NetSuite_Connector.mcp_server import NetSuiteMCPServer
+
+# Create server
+server = NetSuiteMCPServer(
+    account_id="123456_SB1",
+    consumer_keys={"consumer_key": "xxx", "consumer_secret": "yyy"},
+    token_keys={"token_key": "aaa", "token_secret": "bbb"}
+)
 
 # List available tools
+tools = server.list_tools()
+print(f"Available: {[t['name'] for t in tools]}")
+
+# Run a query
+result = server.call_tool("query_netsuite", {
+    "query": "SELECT TOP 5 id, companyname FROM customer"
+})
+print(result)
+```
+
+### Option C: Command Line
+
+```bash
+# Check if your credentials are set up correctly
+python -m NetSuite_Connector --check-config
+
+# See all available tools
 python -m NetSuite_Connector --list-tools
 
-# Run as stdio server (for MCP clients)
+# Start the server (for MCP clients)
 python -m NetSuite_Connector
 ```
 
-### Environment Variables
+---
 
-| Variable | Description |
+## API Reference
+
+### Response Object
+
+All methods return a `NetsuiteObject` with these properties:
+
+| Property | Description |
 |----------|-------------|
-| `NETSUITE_ACCOUNT_ID` | NetSuite account ID (e.g., 123456_SB1) |
-| `NETSUITE_CONSUMER_KEY` | OAuth consumer key |
-| `NETSUITE_CONSUMER_SECRET` | OAuth consumer secret |
-| `NETSUITE_TOKEN_KEY` | Token-based auth token key |
-| `NETSUITE_TOKEN_SECRET` | Token-based auth token secret |
+| `response` | The JSON response from NetSuite |
+| `code` | HTTP status code (200 = success) |
+| `url` | The URL that was called |
+| `request_headers` | Headers that were sent |
+
+### HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created |
+| 204 | Deleted |
+| 400 | Bad request (check your data) |
+| 401 | Authentication failed |
+| 404 | Record not found |
+| 500 | Server error |
 
 ---
 
-## Authentication
+## Environment Variables
 
-This library uses **Token-Based Authentication (TBA)** with OAuth 1.0 and HMAC-SHA256 signatures.
+Set these in your system or `.env` file:
 
-### Setting up TBA in NetSuite
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NETSUITE_ACCOUNT_ID` | Yes | Your NetSuite account ID |
+| `NETSUITE_CONSUMER_KEY` | Yes | OAuth consumer key |
+| `NETSUITE_CONSUMER_SECRET` | Yes | OAuth consumer secret |
+| `NETSUITE_TOKEN_KEY` | Yes | Access token key |
+| `NETSUITE_TOKEN_SECRET` | Yes | Access token secret |
 
-1. Enable Token-Based Authentication in your NetSuite account
-2. Create an Integration record to get Consumer Key and Secret
-3. Create an Access Token for your user to get Token Key and Secret
-4. Use these credentials with the library
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Invalid credentials" | Double-check all 5 credential values |
+| "Record not found" | Verify the record ID exists and you have permission |
+| "Rate limited" | Wait a moment and try again |
+| "Connection timeout" | Check your internet connection |
 
 ---
 
 ## Development
 
-### Install dev dependencies
+### Run Tests
 
 ```bash
 pip install NetSuite-Connector[dev]
-```
-
-### Run tests
-
-```bash
 pytest tests/ -v --cov=src/NetSuite_Connector
 ```
+
+**Current coverage: 98% (121 tests)**
 
 ---
 
 ## License
 
-MIT License
+MIT License - Use it however you like!
