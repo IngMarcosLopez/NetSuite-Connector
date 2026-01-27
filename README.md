@@ -1,162 +1,281 @@
-# NetSuite-Connector
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/NetSuite-ERP-orange?style=for-the-badge" alt="NetSuite">
+  <img src="https://img.shields.io/badge/MCP-AI%20Ready-purple?style=for-the-badge" alt="MCP">
+  <img src="https://img.shields.io/badge/Coverage-98%25-brightgreen?style=for-the-badge" alt="Coverage">
+</p>
+
+<h1 align="center">NetSuite-Connector</h1>
 
 <p align="center">
-  <strong>Connect to NetSuite from Python with ease</strong>
+  <strong>The simplest way to connect Python to NetSuite</strong><br>
+  REST API • SuiteQL Queries • AI Assistant Integration
 </p>
 
 <p align="center">
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-ai-integration">AI Integration</a> •
-  <a href="#-api-reference">API Reference</a>
+  <a href="#-installation">Installation</a> · 
+  <a href="#-quick-start">Quick Start</a> · 
+  <a href="#-suiteql-queries">SuiteQL</a> · 
+  <a href="#-ai-integration">AI Integration</a> · 
+  <a href="#-reference">Reference</a>
 </p>
 
 ---
 
-## What is NetSuite-Connector?
+<br>
 
-NetSuite-Connector is a Python library that lets you connect to NetSuite ERP in three ways:
-
-| Method | Best For |
-|--------|----------|
-| **REST API** | Creating, reading, updating, and deleting records |
-| **SuiteQL** | Running SQL-like queries on your NetSuite data |
-| **MCP Server** | Letting AI assistants (like Claude) work with your NetSuite data |
-
----
-
-## Quick Start
-
-### Step 1: Install
+## Installation
 
 ```bash
 pip install NetSuite-Connector
 ```
 
-### Step 2: Get Your Credentials
+<br>
 
-You'll need these 5 values from your NetSuite account:
+---
 
-| Credential | Where to Find It |
-|------------|------------------|
-| Account ID | Setup > Company > Company Information |
-| Consumer Key | Setup > Integration > Manage Integrations |
-| Consumer Secret | (Generated when creating integration) |
-| Token Key | Setup > Users/Roles > Access Tokens |
-| Token Secret | (Generated when creating token) |
+<br>
 
-### Step 3: Start Using It
+## Quick Start
+
+### 1. Gather Your Credentials
+
+You need 5 values from NetSuite:
+
+<table>
+<tr>
+<td width="200"><strong>Credential</strong></td>
+<td><strong>Where to Find</strong></td>
+</tr>
+<tr>
+<td>Account ID</td>
+<td><code>Setup</code> → <code>Company</code> → <code>Company Information</code></td>
+</tr>
+<tr>
+<td>Consumer Key</td>
+<td><code>Setup</code> → <code>Integration</code> → <code>Manage Integrations</code></td>
+</tr>
+<tr>
+<td>Consumer Secret</td>
+<td>Generated when you create the integration</td>
+</tr>
+<tr>
+<td>Token Key</td>
+<td><code>Setup</code> → <code>Users/Roles</code> → <code>Access Tokens</code></td>
+</tr>
+<tr>
+<td>Token Secret</td>
+<td>Generated when you create the access token</td>
+</tr>
+</table>
+
+<br>
+
+### 2. Connect and Make Your First Request
 
 ```python
 from NetSuite_Connector.NetSuite import NetSuite
 
-# Connect to NetSuite
+# Create your connection
 client = NetSuite(
     account_id="123456_SB1",
-    consumer_keys={"consumer_key": "your_key", "consumer_secret": "your_secret"},
-    token_keys={"token_key": "your_token", "token_secret": "your_token_secret"}
+    consumer_keys={
+        "consumer_key": "your_consumer_key",
+        "consumer_secret": "your_consumer_secret"
+    },
+    token_keys={
+        "token_key": "your_token_key",
+        "token_secret": "your_token_secret"
+    }
 )
 
-# Get a customer record
-result = client.get(url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123")
-print(result.response)
+# Fetch a customer record
+response = client.get(
+    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123"
+)
+
+print(response.code)      # 200
+print(response.response)  # {"id": "123", "companyName": "Acme Corp", ...}
 ```
+
+<br>
 
 ---
 
-## Features
+<br>
 
-### REST API - Work with Records
+## Working with Records
 
-**Get a record:**
+<table>
+<tr>
+<td width="120" align="center"><h3>GET</h3></td>
+<td>
+
 ```python
-result = client.get(
-    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123"
-)
+# Retrieve a record
+result = client.get(url=".../customer/123")
 ```
 
-**Create a record:**
+</td>
+</tr>
+<tr>
+<td align="center"><h3>POST</h3></td>
+<td>
+
 ```python
+# Create a new record
 result = client.post(
-    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer",
-    body={"companyName": "Acme Corp", "email": "contact@acme.com"}
+    url=".../customer",
+    body={"companyName": "New Company", "email": "hello@company.com"}
 )
 ```
 
-**Update a record:**
+</td>
+</tr>
+<tr>
+<td align="center"><h3>PUT</h3></td>
+<td>
+
 ```python
+# Update an existing record
 result = client.put(
-    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123",
-    body={"email": "newemail@acme.com"}
+    url=".../customer/123",
+    body={"email": "updated@company.com"}
 )
 ```
 
-**Delete a record:**
+</td>
+</tr>
+<tr>
+<td align="center"><h3>DELETE</h3></td>
+<td>
+
 ```python
-result = client.delete(
-    url="https://123456.suitetalk.api.netsuite.com/services/rest/record/v1/customer/123"
-)
+# Delete a record
+result = client.delete(url=".../customer/123")
 ```
+
+</td>
+</tr>
+</table>
+
+<br>
 
 ---
 
-### SuiteQL - Query Your Data
+<br>
 
-Run SQL-like queries to pull data from NetSuite:
+## SuiteQL Queries
+
+Run SQL-like queries directly against your NetSuite data.
 
 ```python
 from NetSuite_Connector.ODBC import ODBC
 
-# Connect
 db = ODBC(
     account_id="123456_SB1",
-    consumer_keys={"consumer_key": "your_key", "consumer_secret": "your_secret"},
-    token_keys={"token_key": "your_token", "token_secret": "your_token_secret"}
+    consumer_keys={"consumer_key": "...", "consumer_secret": "..."},
+    token_keys={"token_key": "...", "token_secret": "..."}
 )
 
-# Run a query
-result = db.query("SELECT id, companyname, email FROM customer WHERE isinactive = 'F'")
-print(result.response)
+# Get active customers
+result = db.query("""
+    SELECT id, companyname, email 
+    FROM customer 
+    WHERE isinactive = 'F'
+    ORDER BY companyname
+""")
 ```
 
-**Common queries:**
+<br>
 
-| What You Want | Query |
-|---------------|-------|
-| Active customers | `SELECT * FROM customer WHERE isinactive = 'F'` |
-| Recent invoices | `SELECT * FROM invoice WHERE trandate >= '2024-01-01'` |
-| Open sales orders | `SELECT * FROM salesorder WHERE status = 'open'` |
-| Item list | `SELECT id, itemid, displayname FROM item` |
+### Example Queries
+
+<table>
+<tr><td width="250"><strong>Get all active customers</strong></td>
+<td><code>SELECT * FROM customer WHERE isinactive = 'F'</code></td></tr>
+
+<tr><td><strong>Recent invoices</strong></td>
+<td><code>SELECT * FROM invoice WHERE trandate >= '2024-01-01'</code></td></tr>
+
+<tr><td><strong>Open sales orders</strong></td>
+<td><code>SELECT * FROM salesorder WHERE status = 'Pending Fulfillment'</code></td></tr>
+
+<tr><td><strong>Product catalog</strong></td>
+<td><code>SELECT itemid, displayname, baseprice FROM item</code></td></tr>
+
+<tr><td><strong>Revenue by month</strong></td>
+<td><code>SELECT EXTRACT(MONTH FROM trandate) as month, SUM(total) FROM invoice GROUP BY 1</code></td></tr>
+</table>
+
+<br>
 
 ---
 
+<br>
+
 ## AI Integration
 
-Let AI assistants like Claude interact with your NetSuite data using natural language.
+<p align="center">
+  <strong>Let AI assistants work with your NetSuite data using natural language</strong>
+</p>
 
-### What Can the AI Do?
+<br>
 
-| Tool | What It Does |
-|------|--------------|
-| `query_netsuite` | Run SuiteQL queries |
-| `get_record` | Fetch a specific record |
-| `create_record` | Create new records |
-| `update_record` | Update existing records |
-| `delete_record` | Remove records |
-| `call_restlet` | Call custom scripts |
-| `list_records` | Browse records with filters |
-| `run_saved_search` | Execute saved searches |
+### Available Tools
 
-### Option A: Use with Claude Desktop
+<table>
+<tr>
+<td width="180"><code>query_netsuite</code></td>
+<td>Run SuiteQL queries</td>
+</tr>
+<tr>
+<td><code>get_record</code></td>
+<td>Fetch a specific record by ID</td>
+</tr>
+<tr>
+<td><code>create_record</code></td>
+<td>Create new records</td>
+</tr>
+<tr>
+<td><code>update_record</code></td>
+<td>Modify existing records</td>
+</tr>
+<tr>
+<td><code>delete_record</code></td>
+<td>Remove records</td>
+</tr>
+<tr>
+<td><code>list_records</code></td>
+<td>Browse records with pagination</td>
+</tr>
+<tr>
+<td><code>call_restlet</code></td>
+<td>Execute custom SuiteScripts</td>
+</tr>
+<tr>
+<td><code>run_saved_search</code></td>
+<td>Run saved searches</td>
+</tr>
+</table>
 
-**1. Find your config file:**
+<br>
 
-| System | Location |
-|--------|----------|
+### Setup for Claude Desktop
+
+<details>
+<summary><strong>Click to expand setup instructions</strong></summary>
+
+<br>
+
+**Step 1:** Find your Claude config file
+
+| System | Path |
+|--------|------|
 | Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
 | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
 
-**2. Add this configuration:**
+**Step 2:** Add this configuration
 
 ```json
 {
@@ -176,117 +295,141 @@ Let AI assistants like Claude interact with your NetSuite data using natural lan
 }
 ```
 
-**3. Restart Claude Desktop**
+**Step 3:** Restart Claude Desktop
 
-**4. Ask Claude things like:**
-- "Show me the top 10 customers by revenue"
-- "Get invoice number 12345"
-- "What sales orders are pending this week?"
-- "Create a new customer record for Acme Corp"
+**Step 4:** Start asking questions!
 
-### Option B: Use in Your Python Code
+> "Show me this month's top 10 customers by revenue"
+
+> "Get the details for invoice #12345"
+
+> "What sales orders are pending fulfillment?"
+
+> "Create a new customer for Acme Corporation"
+
+</details>
+
+<br>
+
+### Use in Python
 
 ```python
 from NetSuite_Connector.mcp_server import NetSuiteMCPServer
 
-# Create server
 server = NetSuiteMCPServer(
     account_id="123456_SB1",
-    consumer_keys={"consumer_key": "xxx", "consumer_secret": "yyy"},
-    token_keys={"token_key": "aaa", "token_secret": "bbb"}
+    consumer_keys={"consumer_key": "...", "consumer_secret": "..."},
+    token_keys={"token_key": "...", "token_secret": "..."}
 )
 
-# List available tools
-tools = server.list_tools()
-print(f"Available: {[t['name'] for t in tools]}")
-
-# Run a query
+# Run a query through the AI interface
 result = server.call_tool("query_netsuite", {
     "query": "SELECT TOP 5 id, companyname FROM customer"
 })
-print(result)
 ```
 
-### Option C: Command Line
+<br>
+
+### Command Line
 
 ```bash
-# Check if your credentials are set up correctly
+# Verify your credentials
 python -m NetSuite_Connector --check-config
 
-# See all available tools
+# List available tools
 python -m NetSuite_Connector --list-tools
 
-# Start the server (for MCP clients)
+# Start the MCP server
 python -m NetSuite_Connector
 ```
 
+<br>
+
 ---
 
-## API Reference
+<br>
+
+## Reference
 
 ### Response Object
 
-All methods return a `NetsuiteObject` with these properties:
+Every request returns a `NetsuiteObject`:
 
-| Property | Description |
-|----------|-------------|
-| `response` | The JSON response from NetSuite |
-| `code` | HTTP status code (200 = success) |
-| `url` | The URL that was called |
-| `request_headers` | Headers that were sent |
+```python
+result = client.get(url="...")
 
-### HTTP Status Codes
+result.code              # HTTP status code (200, 404, etc.)
+result.response          # JSON response body
+result.url               # URL that was called
+result.request_headers   # Headers sent with request
+```
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 204 | Deleted |
-| 400 | Bad request (check your data) |
-| 401 | Authentication failed |
-| 404 | Record not found |
-| 500 | Server error |
+<br>
+
+### Status Codes
+
+| Code | Status | Meaning |
+|:----:|--------|---------|
+| `200` | OK | Request successful |
+| `201` | Created | Record created |
+| `204` | No Content | Record deleted |
+| `400` | Bad Request | Check your request data |
+| `401` | Unauthorized | Check your credentials |
+| `404` | Not Found | Record doesn't exist |
+| `429` | Too Many Requests | Rate limited, wait and retry |
+
+<br>
+
+### Environment Variables
+
+```bash
+export NETSUITE_ACCOUNT_ID="123456_SB1"
+export NETSUITE_CONSUMER_KEY="your_consumer_key"
+export NETSUITE_CONSUMER_SECRET="your_consumer_secret"
+export NETSUITE_TOKEN_KEY="your_token_key"
+export NETSUITE_TOKEN_SECRET="your_token_secret"
+```
+
+<br>
 
 ---
 
-## Environment Variables
-
-Set these in your system or `.env` file:
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NETSUITE_ACCOUNT_ID` | Yes | Your NetSuite account ID |
-| `NETSUITE_CONSUMER_KEY` | Yes | OAuth consumer key |
-| `NETSUITE_CONSUMER_SECRET` | Yes | OAuth consumer secret |
-| `NETSUITE_TOKEN_KEY` | Yes | Access token key |
-| `NETSUITE_TOKEN_SECRET` | Yes | Access token secret |
-
----
+<br>
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| "Invalid credentials" | Double-check all 5 credential values |
-| "Record not found" | Verify the record ID exists and you have permission |
-| "Rate limited" | Wait a moment and try again |
-| "Connection timeout" | Check your internet connection |
+| Authentication failed | Verify all 5 credentials are correct |
+| Record not found | Check the record ID and your permissions |
+| Rate limited | Wait 60 seconds before retrying |
+| Connection timeout | Check your network connection |
+| Invalid account ID | Format should be like `123456` or `123456_SB1` |
+
+<br>
 
 ---
+
+<br>
 
 ## Development
 
-### Run Tests
-
 ```bash
+# Install with dev dependencies
 pip install NetSuite-Connector[dev]
+
+# Run tests
 pytest tests/ -v --cov=src/NetSuite_Connector
 ```
 
-**Current coverage: 98% (121 tests)**
+<p align="center">
+  <strong>121 tests</strong> · <strong>98% coverage</strong>
+</p>
+
+<br>
 
 ---
 
-## License
-
-MIT License - Use it however you like!
+<p align="center">
+  <strong>MIT License</strong> · Made with Python
+</p>
