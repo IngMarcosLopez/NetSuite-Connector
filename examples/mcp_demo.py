@@ -1,126 +1,88 @@
 """
 Demo: How the NetSuite MCP Server works
 
-This demonstrates the MCP server without requiring actual NetSuite credentials.
-It shows the tool registration, listing, and calling patterns.
+This demonstrates the MCP server integration with the new modular structure.
 """
 import json
-import os
+import sys
+sys.path.insert(0, "/home/runner/workspace/src")
 
 print("=" * 60)
-print("NetSuite MCP Server - Demo")
+print("NetSuite MCP Server - Integration Demo")
 print("=" * 60)
 
-print("\n1. MCP TOOL DEFINITIONS")
+print("\n1. TESTING MCP CONFIG MODULE")
 print("-" * 40)
 
-tools = [
-    {
-        "name": "query_netsuite",
-        "description": "Execute a SuiteQL query against NetSuite",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "SuiteQL query"}
-            },
-            "required": ["query"]
-        }
-    },
-    {
-        "name": "call_restlet",
-        "description": "Call a NetSuite RESTlet endpoint",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string"},
-                "method": {"type": "string", "enum": ["GET", "POST", "PUT", "DELETE"]},
-                "body": {"type": "object"}
-            },
-            "required": ["url", "method"]
-        }
-    },
-    {
-        "name": "get_record",
-        "description": "Retrieve a NetSuite record by type and ID",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "record_type": {"type": "string"},
-                "record_id": {"type": "string"}
-            },
-            "required": ["record_type", "record_id"]
-        }
-    }
-]
+from NetSuite_Connector.mcp_config import NetSuiteConfig, load_config_from_env, validate_config
 
+config = NetSuiteConfig(
+    account_id="123456_SB1",
+    consumer_key="test_consumer_key",
+    consumer_secret="test_consumer_secret",
+    token_key="test_token_key",
+    token_secret="test_token_secret"
+)
+print(f"Config created: account_id={config.account_id}")
+print(f"Consumer keys: {list(config.consumer_keys.keys())}")
+print(f"Token keys: {list(config.token_keys.keys())}")
+
+errors = validate_config(config)
+print(f"Validation errors: {errors if errors else 'None - config is valid'}")
+
+print("\n2. TESTING MCP TOOLS MODULE")
+print("-" * 40)
+
+from NetSuite_Connector.mcp_tools import get_tool_definitions, TOOL_SCHEMAS
+
+tools = get_tool_definitions()
+print(f"Total tools available: {len(tools)}")
 for tool in tools:
-    print(f"\nTool: {tool['name']}")
-    print(f"  Description: {tool['description']}")
-    print(f"  Required params: {tool['inputSchema'].get('required', [])}")
+    required = tool.get('inputSchema', {}).get('required', [])
+    print(f"  - {tool['name']}: {len(required)} required params")
 
-print("\n\n2. MCP PROTOCOL FLOW")
+print("\n3. TESTING MCP SERVER MODULE")
 print("-" * 40)
 
-print("\n[Step 1] AI Client sends 'initialize' request:")
+from NetSuite_Connector.mcp_server import NetSuiteMCPServer
+
+server = NetSuiteMCPServer(
+    account_id="123456_SB1",
+    consumer_keys={"consumer_key": "test", "consumer_secret": "test"},
+    token_keys={"token_key": "test", "token_secret": "test"}
+)
+
+print(f"Server created: version {server.VERSION}")
+print(f"Protocol version: {server.PROTOCOL_VERSION}")
+print(f"Tools registered: {len(server.list_tools())}")
+
+print("\n4. MCP PROTOCOL FLOW SIMULATION")
+print("-" * 40)
+
 init_request = {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
-print(f"  Request:  {json.dumps(init_request)}")
+init_response = server.handle_mcp_request(init_request)
+print(f"[initialize] Server info: {init_response['result']['serverInfo']['name']}")
 
-init_response = {
-    "jsonrpc": "2.0",
-    "id": 1,
-    "result": {
-        "protocolVersion": "2024-11-05",
-        "capabilities": {"tools": {}},
-        "serverInfo": {"name": "netsuite-connector-mcp", "version": "0.1.0"}
-    }
-}
-print(f"  Response: {json.dumps(init_response, indent=2)}")
-
-print("\n[Step 2] AI Client requests 'tools/list':")
 list_request = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
-print(f"  Request:  {json.dumps(list_request)}")
-print(f"  Response: <returns {len(tools)} tool definitions>")
+list_response = server.handle_mcp_request(list_request)
+print(f"[tools/list] Found {len(list_response['result']['tools'])} tools")
 
-print("\n[Step 3] AI Client calls a tool 'tools/call':")
-call_request = {
-    "jsonrpc": "2.0",
-    "id": 3,
-    "method": "tools/call",
-    "params": {
-        "name": "query_netsuite",
-        "arguments": {"query": "SELECT TOP 5 id, companyname FROM customer"}
-    }
-}
-print(f"  Request:  {json.dumps(call_request, indent=2)}")
+ping_request = {"jsonrpc": "2.0", "id": 3, "method": "ping"}
+ping_response = server.handle_mcp_request(ping_request)
+print(f"[ping] Response: {ping_response['result']}")
 
-mock_response = {
-    "jsonrpc": "2.0",
-    "id": 3,
-    "result": {
-        "content": [{
-            "type": "text",
-            "text": json.dumps({
-                "status_code": 200,
-                "data": {
-                    "items": [
-                        {"id": "101", "companyname": "Acme Corp"},
-                        {"id": "102", "companyname": "TechStart Inc"}
-                    ]
-                }
-            })
-        }]
-    }
-}
-print(f"  Response: {json.dumps(mock_response, indent=2)}")
+unknown_request = {"jsonrpc": "2.0", "id": 4, "method": "unknown/method"}
+unknown_response = server.handle_mcp_request(unknown_request)
+print(f"[unknown] Error handled: {unknown_response.get('error', {}).get('code')}")
 
-print("\n\n3. CLAUDE DESKTOP CONFIGURATION")
+print("\n5. CLAUDE DESKTOP CONFIGURATION")
 print("-" * 40)
 
 claude_config = {
     "mcpServers": {
         "netsuite": {
             "command": "python",
-            "args": ["-m", "NetSuite_Connector.mcp_server"],
+            "args": ["-m", "NetSuite_Connector"],
             "env": {
                 "NETSUITE_ACCOUNT_ID": "your_account_id",
                 "NETSUITE_CONSUMER_KEY": "your_consumer_key",
@@ -132,34 +94,23 @@ claude_config = {
     }
 }
 
-print("\nAdd this to your Claude Desktop config file:")
+print("Config file locations:")
 print("  Windows: %APPDATA%\\Claude\\claude_desktop_config.json")
 print("  macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json")
-print(f"\n{json.dumps(claude_config, indent=2)}")
+print(f"\nSample config:\n{json.dumps(claude_config, indent=2)}")
 
-print("\n\n4. USAGE EXAMPLE (with real credentials)")
+print("\n6. TOOL DETAILS")
 print("-" * 40)
-print("""
-from NetSuite_Connector.mcp_server import NetSuiteMCPServer
 
-# Initialize the server
-server = NetSuiteMCPServer(
-    account_id="123456_SB1",
-    consumer_keys={"consumer_key": "xxx", "consumer_secret": "yyy"},
-    token_keys={"token_key": "aaa", "token_secret": "bbb"}
-)
-
-# List available tools
-tools = server.list_tools()
-print(f"Available tools: {[t['name'] for t in tools]}")
-
-# Call a tool (AI would do this)
-result = server.call_tool("query_netsuite", {
-    "query": "SELECT TOP 10 * FROM customer"
-})
-print(result)
-""")
+for tool in server.list_tools():
+    print(f"\n{tool['name']}:")
+    print(f"  {tool['description'][:60]}...")
+    props = tool.get('inputSchema', {}).get('properties', {})
+    required = tool.get('inputSchema', {}).get('required', [])
+    for prop_name in props:
+        marker = "*" if prop_name in required else " "
+        print(f"    {marker} {prop_name}")
 
 print("\n" + "=" * 60)
-print("Demo complete! The MCP server is ready for integration.")
+print("Demo complete! All modules integrated successfully.")
 print("=" * 60)

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "netsuite": {
+      "command": "python",
+      "args": ["-m", "NetSuite_Connector"],
+      "env": {
+        "NETSUITE_ACCOUNT_ID": "YOUR_ACCOUNT_ID",
+        "NETSUITE_CONSUMER_KEY": "YOUR_CONSUMER_KEY",
+        "NETSUITE_CONSUMER_SECRET": "YOUR_CONSUMER_SECRET",
+        "NETSUITE_TOKEN_KEY": "YOUR_TOKEN_KEY",
+        "NETSUITE_TOKEN_SECRET": "YOUR_TOKEN_SECRET"
+      }
+    }
+  }
+}
