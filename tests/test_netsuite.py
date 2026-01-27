@@ -79,7 +79,7 @@ class TestNetSuite:
         assert result.response == json.dumps(response_data)
         assert result.code == 200
 
-    # Tests that an invalid URL raises an exception.
+    # Tests that an invalid URL returns error response.
     def test_invalid_url(self):
         # Arrange
         url = "invalid_url"
@@ -91,11 +91,11 @@ class TestNetSuite:
             token_keys={"token_key": "", "token_secret": ""},
         )
 
-        # Assert
-        with pytest.raises(Exception):
-            ns.get(url=url)
+        # Assert - code catches exception and returns 500
+        result = ns.get(url=url)
+        assert result.code == 500
 
-    # Tests that an invalid HTTP method raises an exception.
+    # Tests that an invalid HTTP method returns error response.
     def test_invalid_http_method(self):
         # Arrange
         http_method = "INVALID_METHOD"
@@ -107,11 +107,11 @@ class TestNetSuite:
             token_keys={"token_key": "", "token_secret": ""},
         )
 
-        # Assert
-        with pytest.raises(Exception):
-            ns._make_request(
-                http_method=http_method, url="", headers={}, params={}, body={}
-            )
+        # Assert - code catches exception and returns 500
+        result = ns._make_request(
+            http_method=http_method, url="", headers={}, params={}, body={}
+        )
+        assert result.code == 500
 
     # Tests that failed requests are handled properly.
     def test_failed_request_error_handling(self, requests_mock):
